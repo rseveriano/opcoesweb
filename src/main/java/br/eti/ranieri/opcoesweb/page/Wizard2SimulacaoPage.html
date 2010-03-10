@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/">
+	<head>
+		<title>OpçõesWeb</title>
+		<wicket:head>
+			<wicket:link>
+				<link href="res/wizard2SimulacaoPage.css" rel="stylesheet" type="text/css" />
+				<link href="res/bettertip/jquery.bettertip.css" rel="stylesheet" type="text/css" />
+				<script type="text/javascript" src="res/jquery-1.3.2.min.js"></script>
+				<script type="text/javascript" src="res/bettertip/jquery.bettertip.js"></script>
+				<script type="text/javascript">
+					$(function(){
+						BT_setOptions({openWait:250, closeWait:0, cacheEnabled:true});
+					})
+				</script>
+
+			</wicket:link>
+		</wicket:head>
+	</head>
+	<body>
+		<!-- Menu -->
+		<!-- CORPO -->
+		<wicket:extend>
+			<h1>Configuração de Simulação sobre Base Histórica de Opções</h1>
+			<table class="informacoesConfiguracao">
+				<thead>
+					<tr>
+						<td>Ação</td>
+						<td>Custódia</td>
+						<td>Início</td>
+						<td>Final</td>
+						<td>Prejuízo Máximo</td>
+						<td>Corretagem Integral</td>
+						<td>Corretagem Opções</td>
+						<td>Corretagem Fracionário</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><span wicket:id="acao">PETR4</span></td>
+						<td><span wicket:id="custodiaInicial">1.000</span></td>
+						<td><span wicket:id="dataInicial">10/01/2008</span></td>
+						<td><span wicket:id="dataFinal">10/10/2008</span></td>
+						<td><span wicket:id="prejuizoMaximo">R$ -2.000,00</span></td>
+						<td><span wicket:id="corretagemIntegral">R$ 20,00</span></td>
+						<td><span wicket:id="corretagemOpcoes">R$ 10,00</span></td>
+						<td><span wicket:id="corretagemFracionario">R$ 5,00</span></td>
+					</tr>
+				</tbody>
+			</table>
+			<div wicket:id="feedback">Configuração submetida com sucesso.</div>
+
+			<form wicket:id="formulario">
+
+			<table class="mapaCotacoesPorDia">
+				<tbody>
+					<tr wicket:id="diaLoop">
+						<th>
+							<span wicket:id="dia">02/05/09</span>
+						</th>
+
+						<wicket:container wicket:id="radioGroup">
+						<td wicket:id="opcaoLoop">
+							<input wicket:id="radio" type="radio" name="020509" class="radioButton"
+							/><a wicket:id="codigoLink" href="$A32Tip" class="betterTip" title="PETRA32"
+								><span wicket:id="codigoText" class="codigo">A32</span
+							></a>
+							<div wicket:id="detalhes" style="display:none" id="A32Tip">
+								<span style="float: left; width: 50%;">Ação:</span><span style="float: left;" wicket:id="precoAcao">R$ 32,64</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">Opção:</span><span style="float: left;" wicket:id="precoReal">R$ 1,83</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">Strike:</span><span style="float: left;" wicket:id="strike">R$ 32,00</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">Volume:</span><span style="float: left;" wicket:id="volume">297k</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">Taxa VE:</span><span style="float: left;" wicket:id="taxaVE">4,21%</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">TheVE:</span><span style="float: left;" wicket:id="theVE">0,11%</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">VDX:</span><span style="float: left;" wicket:id="vdx">3,48</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">Não-Vende:</span><span style="float: left;" wicket:id="naoVende">0,58</span> <br style="clear:left;"/>
+								<span style="float: left; width: 50%;">BOSI:</span><span style="float: left;" wicket:id="bosi">1,83</span> <br style="clear:left;"/>
+							</div>
+						</td>
+						</wicket:container>
+
+						<wicket:remove>
+						<td><input type="radio" name="020509"/><span>PETRA64</span></td>
+						<td><input type="radio" name="020509"/><span>PETRA66</span></td>
+						<td><input type="radio" name="020509"/><span>PETRA68</span></td>
+						</wicket:remove>
+					</tr>
+					<wicket:remove>
+					<tr>
+						<th>05/05/09</th>
+						<td><input type="radio" name="050509"/><span>PETRA62</span></td>
+						<td><input type="radio" name="050509"/><span>PETRA64</span></td>
+						<td><input type="radio" name="050509"/><span>PETRA66</span></td>
+						<td><input type="radio" name="050509"/><span>PETRA68</span></td>
+					</tr>
+					<tr>
+						<th>06/05/09</th>
+						<td><input type="radio" name="060509"/><span>PETRA64</span></td>
+						<td><input type="radio" name="060509"/><span>PETRA66</span></td>
+						<td><input type="radio" name="060509"/><span>PETRA68</span></td>
+						<td><input type="radio" name="060509"/><span>PETRA70</span></td>
+					</tr>
+					</wicket:remove>
+				</tbody>
+			</table>
+
+			<input type="submit" value="Simular"/>
+			</form>
+
+		</wicket:extend>
+		<!-- RODAPÉ -->
+	</body>
+</html>
+

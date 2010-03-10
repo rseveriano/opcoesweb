@@ -1,0 +1,22 @@
+tr.variacaoNegativa {
+	background-color: red;
+	color: white;
+}
+tr.variacaoPositiva {
+	background-color: green;
+	color: white;
+}
+tr.variacaoNeutra {
+	background-color: rgb(200,200,200);
+	color: black;
+}
+tr#tarjaAcao td {
+	padding: 10px 10px;
+	font-weight: bold;
+}
+tr#tarjaAcao td {
+	text-align: right;
+}
+tr#tarjaAcao td span#codigoAcao {
+	float: left;
+}

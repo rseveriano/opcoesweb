@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/">
+	<head>
+		<title>Painel de Opções</title>
+		<wicket:head>
+			<wicket:link>
+				<link href="res/painelAcaoOpcoes.css" rel="stylesheet" type="text/css" />
+			</wicket:link>
+		</wicket:head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	</head>
+	<body>
+		Este painel será utilizado nas telas que necessitarem exibir as cotações
+		da ação e de opções de duas séries, com seus cálculos e indicadores de
+		apoio à decisão.
+		<wicket:panel>
+			<table>
+                <thead>
+                    <tr id="tarjaAcao" wicket:id="tarjaAcao">
+                        <td>
+                            <span wicket:id="codigoAcao" id="codigoAcao">PETR4</span>
+                            <span wicket:id="precoAcao">R$ 28,55</span>
+                            <span wicket:id="variacaoAcao">(-0,8%)</span>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><div wicket:id="painelOpcoesSerie1">[TABELA DE ANALISE OPCOES PETR SERIE 1]</div></td>
+                    </tr>
+                    <tr>
+                        <td><div wicket:id="painelOpcoesSerie2">[TABELA DE ANALISE OPCOES PETR SERIE 2]</div></td>
+                    </tr>
+                </tbody>
+            </table>
+		</wicket:panel>
+	</body>
+</html>

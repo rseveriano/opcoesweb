@@ -1,0 +1,26 @@
+label.rotulo {
+float: left;
+width: 240px;
+text-align: right;
+margin: 5px;
+}
+
+input {
+width: 180px;
+margin-bottom: 5px;
+margin: 5px;
+}
+
+.boxes {
+width: 1em;
+}
+
+.submitbutton {
+margin-left: 255px;
+margin-top: 5px;
+width: 90px;
+}
+
+br {
+clear: left;
+}

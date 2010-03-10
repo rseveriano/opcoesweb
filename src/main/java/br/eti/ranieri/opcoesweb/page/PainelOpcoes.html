@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/">
+	<head>
+		<title>Painel de Opções</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+		<wicket:head>
+			<wicket:link>
+				<link href="res/painelOpcoes.css" rel="stylesheet" type="text/css" />
+			</wicket:link>
+		</wicket:head>
+	</head>
+	<body>
+		Este painel será utilizado nas telas que necessitarem exibir as opções
+		de uma série, com seus cálculos e indicadores de apoio à decisão.
+		<wicket:panel>
+			<div id="tarjaSerie">
+				<div class="serie">
+					<span wicket:id="descricaoSerie" class="descricaoSerie">Série A</span>
+					<span wicket:id="vencimento" class="vencimento">Vencimento 19/01/2009</span>
+				</div>
+				<div wicket:id="atualizacao" class="atualizacao">Atualizado em 19:00 16/05/2009</div>
+			</div>
+			<table class="painelOpcoes">
+				<thead>
+					<tr>
+						<th></th>
+						<th wicket:id="opcaoLoop">
+							<span wicket:id="valor">PETRD26</span>
+						</th>
+						<wicket:remove>
+							<th>PETRD28</th>
+							<th>PETRD30</th>
+						</wicket:remove>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+                        <th>x</th>
+                        <td wicket:id="strikeLoop"><span wicket:id="valor">R$ 26,00</span></td>
+                        <wicket:remove>
+                        <td>R$ 28,00</td>
+                        <td>R$ 30,00</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>r</th>
+                        <td wicket:id="jurosLoop"><span wicket:id="valor">13,6%</span></td>
+                        <wicket:remove>
+                        <td>13,6%</td>
+                        <td>13,6%</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>&sigma;</th>
+                        <td wicket:id="sigmaLoop"><span wicket:id="valor">46,0%</span></td>
+                        <wicket:remove>
+                        <td>46,0%</td>
+                        <td>46,0%</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>teórico</th>
+                        <td wicket:id="teoricoLoop"><span wicket:id="valor">R$ 0,81</span></td>
+                        <wicket:remove>
+                        <td>R$ 0,62</td>
+                        <td>R$ 0,13</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>real</th>
+                        <td wicket:id="realLoop"><span wicket:id="valor">R$ 0,82</span></td>
+                        <wicket:remove>
+                        <td>R$ 0,65</td>
+                        <td>R$ 0,09</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>volume</th>
+                        <td wicket:id="volumeLoop"><span wicket:id="valor">20.690.927</span></td>
+                        <wicket:remove>
+                        <td>1.752.824</td>
+                        <td>657.820</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>&delta;</th>
+                        <td wicket:id="deltaLoop"><span wicket:id="valor">0,42</span></td>
+                        <wicket:remove>
+                        <td>0,28</td>
+                        <td>0,17</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>&gamma;</th>
+                        <td wicket:id="gammaLoop"><span wicket:id="valor">0,14</span></td>
+                        <wicket:remove>
+                        <td>0,07</td>
+                        <td>0,05</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>&theta;</th>
+                        <td wicket:id="thetaLoop"><span wicket:id="valor">-0,03</span></td>
+                        <wicket:remove>
+                        <td>-0,02</td>
+                        <td>-0,01</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>VI</th>
+                        <td wicket:id="viLoop"><span wicket:id="valor">R$ 0,00</span></td>
+                        <wicket:remove>
+                        <td>R$ 0,00</td>
+                        <td>R$ 0,00</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr>
+                        <th>VE</th>
+                        <td wicket:id="veLoop"><span wicket:id="valor">R$ 0,82</span></td>
+                        <wicket:remove>
+                        <td>R$ 0,65</td>
+                        <td>R$ 0,09</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorValor">
+                        <th>VE%</th>
+                        <td wicket:id="vePercentLoop"><span wicket:id="valor">3,0%</span></td>
+                        <wicket:remove>
+                        <td>1,8%</td>
+                        <td>0,4%</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorValor">
+                        <th>NV</th>
+                        <td wicket:id="naoVendeLoop"><span wicket:id="valor">R$ 0,26</span></td>
+                        <wicket:remove>
+                        <td>R$ 0,17</td>
+                        <td>R$ 0,04</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorValor">
+                        <th>TheVE</th>
+                        <td wicket:id="theveLoop"><span wicket:id="valor">0,12%</span></td>
+                        <wicket:remove>
+                        <td>0,07%</td>
+                        <td>0,05%</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorAlvo">
+                        <th>VDX</th>
+                        <td wicket:id="vdxLoop"><span wicket:id="valor">-3,42</span></td>
+                        <wicket:remove>
+                        <td>0,28</td>
+                        <td>1,73</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorAlvo">
+                        <th>BOSI</th>
+                        <td wicket:id="bosiLoop"><span wicket:id="valor">4,5%</span></td>
+                        <wicket:remove>
+                        <td>3,1%</td>
+                        <td>0,9%</td>
+                        </wicket:remove>
+                    </tr>
+                    <tr class="indicadorAlvo">
+                        <th>ATM</th>
+                        <td wicket:id="atmLoop"><span wicket:id="valor">52,5%</span></td>
+                        <wicket:remove>
+                        <td>1,2%</td>
+                        <td>0,0%</td>
+                        </wicket:remove>
+                    </tr>
+				</tbody>
+			</table>
+		</wicket:panel>
+	</body>
+</html>

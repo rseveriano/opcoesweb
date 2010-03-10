@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+
+	<bean id="wicketApplication" class="br.eti.ranieri.opcoesweb.WicketApplication">
+	</bean>
+
+	<bean class="br.eti.ranieri.opcoesweb.persistencia.Persistencia">
+		<property name="arquivoPersistencia" value="base-historica.gz" />
+	</bean>
+	
+	<!--
+		Implicitly registered post-processors include
+		AutowiredAnnotationBeanPostProcessor (for @Autowired),
+		CommonAnnotationBeanPostProcessor (for @Resource, @PostConstruct, and
+		@PreDestroy), PersistenceAnnotationBeanPostProcessor (for
+		@Transactional and @PersistenceContext/@PersistenceUnit) and
+		RequiredAnnotationBeanPostProcessor (for @Required).
+	-->
+	<context:annotation-config />
+	<!--
+		To autodetect @Component @Repository @Service @Controller and register
+		the corresponding beans requires the inclusion of the following
+		element in XML where 'basePackage' would be a common parent package
+		for the two classes (or alternatively a comma-separated list could be
+		specified that included the parent package of each class).
+	-->
+	<context:component-scan base-package="br.eti.ranieri.opcoesweb" />
+
+	<!--
+		Enable a component that is aware of the @Required annotation and that
+		can process it appropriately.
+	<bean
+		class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor" />
+	-->
+
+</beans>

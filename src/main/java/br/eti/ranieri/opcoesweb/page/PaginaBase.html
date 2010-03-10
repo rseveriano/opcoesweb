@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/">
+    <head>
+        <title>OpçõesWeb</title>
+        <wicket:head>
+			<wicket:link>
+				<link href="res/paginaBase.css" rel="stylesheet" type="text/css" />
+			</wicket:link>
+		</wicket:head>
+    </head>
+    <body>
+        <!-- Menu -->
+        <ul>
+            <li>
+                Online
+                <ul>
+                    <li><a href="#" wicket:id="configurar">Configurar</a></li>
+                    <li><a href="#" wicket:id="exibirOnline">Exibir</a></li>
+                </ul>
+            </li>
+            <li>
+                Offline
+                <ul>
+					<li><a href="#" wicket:id="importadorSerieHistorica">Importar Série Histórica</a></li>
+                    <li><a href="#" wicket:id="exibirOffline">Exibir</a></li>
+                </ul>
+            </li>
+            <li>
+                Simulação
+                <ul>
+                	<li><a href="#" wicket:id="calcularBlackScholesAdhoc">Calcular Opção Teórica Ad-hoc</a></li>
+                    <li><a href="#" wicket:id="wizardSimulacao">Simulação Manual</a></li>
+                </ul>
+            </li>
+        </ul>
+        <!-- CORPO -->
+        <wicket:child/>
+        <!-- RODAPÉ -->
+    </body>
+</html>
+
