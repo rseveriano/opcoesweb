@@ -7,6 +7,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.LoggerFactory;
 
+import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 import br.eti.ranieri.opcoesweb.importacao.offline.ImportadorOffline;
 
 public class ImportarSerieHistoricaPage extends PaginaBase {
@@ -22,7 +23,7 @@ public class ImportarSerieHistoricaPage extends PaginaBase {
 			@Override
 			protected void onSubmit() {
 				try {
-					importador.importar(localizacao.getObject(), getSessaoHttp().getConfiguracaoImportacao());
+					importador.importar(localizacao.getObject(), OpcoesWebHttpSession.get().getConfiguracaoImportacao());
 					info("Importação realizada com sucesso.");
 				} catch (Exception e) {
 					LoggerFactory.getLogger(getClass()).error("Erro na importacao", e);

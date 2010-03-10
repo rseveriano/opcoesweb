@@ -12,29 +12,40 @@ import br.eti.ranieri.opcoesweb.estado.CotacaoAcaoOpcoes;
 
 public class OpcoesWebHttpSession extends WebSession {
 
-	private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
-	private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
-	private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
+    private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
+    private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
+    private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
+    private boolean autenticado = false;
 
-	public OpcoesWebHttpSession(Request request) {
-		super(request);
-	}
+    public OpcoesWebHttpSession(Request request) {
+	super(request);
+    }
 
-	public ConfiguracaoOnline getConfiguracaoOnline() {
-		return configuracaoOnline;
-	}
+    public static OpcoesWebHttpSession get() {
+	return (OpcoesWebHttpSession) WebSession.get();
+    }
 
-	public ConfiguracaoImportacao getConfiguracaoImportacao() {
-		return configuracaoImportacao;
-	}
+    public ConfiguracaoOnline getConfiguracaoOnline() {
+	return configuracaoOnline;
+    }
 
-	public Map<Acao, CotacaoAcaoOpcoes> getCacheCotacoesOnline() {
-		return cacheCotacoesOnline;
-	}
+    public ConfiguracaoImportacao getConfiguracaoImportacao() {
+	return configuracaoImportacao;
+    }
 
-	public void setCacheCotacoesOnline(
-			Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline) {
-		this.cacheCotacoesOnline = cacheCotacoesOnline;
-	}
+    public Map<Acao, CotacaoAcaoOpcoes> getCacheCotacoesOnline() {
+	return cacheCotacoesOnline;
+    }
 
+    public void setCacheCotacoesOnline(Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline) {
+	this.cacheCotacoesOnline = cacheCotacoesOnline;
+    }
+
+    public boolean isAutenticado() {
+	return autenticado;
+    }
+
+    public void setAutenticado(boolean autenticado) {
+	this.autenticado = autenticado;
+    }
 }

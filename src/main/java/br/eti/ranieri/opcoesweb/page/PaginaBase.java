@@ -17,8 +17,10 @@
 
 package br.eti.ranieri.opcoesweb.page;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.PageLink;
 
 import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 
@@ -34,9 +36,18 @@ public abstract class PaginaBase extends WebPage {
         add(new BookmarkablePageLink("exibirOffline", ExibirOfflinePage.class));
         add(new BookmarkablePageLink("calcularBlackScholesAdhoc", CalcularBlackScholesAdhocPage.class));
         add(new BookmarkablePageLink("wizardSimulacao", Wizard1SimulacaoPage.class));
-    }
-    
-    public OpcoesWebHttpSession getSessaoHttp() {
-    	return (OpcoesWebHttpSession) getSession();
+        
+        PageParameters parameters = new PageParameters();
+        parameters.add(LogoutPage.REDIRECTPAGE_PARAM, logoutPageClass
+        	    .getName());
+        	add(new BookmarkablePageLink("signout", SignOutPage.class,
+        	    parameters) {
+        	  @Override
+        	  public boolean isVisible() {
+        	    return WiaSession.get().isAuthenticated();
+        	  }
+        	});
+
+        add(new PageLink("logoutLink", c));
     }
 }

@@ -29,6 +29,7 @@ import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 import br.eti.ranieri.opcoesweb.estado.ConfiguracaoOnline;
 
 /**
@@ -40,7 +41,7 @@ public class ConfigurarOnlinePage extends PaginaBase {
     public ConfigurarOnlinePage() {
         add(new FeedbackPanel("feedback"));
         
-        final ConfiguracaoOnline configuracao = getSessaoHttp().getConfiguracaoOnline();
+        final ConfiguracaoOnline configuracao = OpcoesWebHttpSession.get().getConfiguracaoOnline();
         Form formulario = new Form("formulario", new CompoundPropertyModel(configuracao)) {
 
             @Override

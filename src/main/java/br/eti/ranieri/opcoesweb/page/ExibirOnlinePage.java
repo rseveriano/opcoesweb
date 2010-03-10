@@ -26,6 +26,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.joda.time.DateTime;
 
+import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 import br.eti.ranieri.opcoesweb.estado.Acao;
 import br.eti.ranieri.opcoesweb.estado.CotacaoAcaoOpcoes;
 import br.eti.ranieri.opcoesweb.importacao.online.ImportadorOnline;
@@ -49,13 +50,13 @@ public class ExibirOnlinePage extends PaginaBase {
 			}
 		});
 
-		boolean configurado = getSessaoHttp().getConfiguracaoOnline()
+		boolean configurado = OpcoesWebHttpSession.get().getConfiguracaoOnline()
 				.isConfigurado();
 		if (configurado == false) {
 			info("Para exibir cotações online, é necessária configuração.");
 			setResponsePage(ConfigurarOnlinePage.class);
 		} else {
-			Map<Acao, CotacaoAcaoOpcoes> cotacoesOnline = getSessaoHttp()
+			Map<Acao, CotacaoAcaoOpcoes> cotacoesOnline = OpcoesWebHttpSession.get()
 					.getCacheCotacoesOnline();
 			add(new PainelAcaoOpcoes("tabelaPetrobras", cotacoesOnline == null ? null : cotacoesOnline
 					.get(PETROBRAS), new DateTime()));
@@ -65,8 +66,8 @@ public class ExibirOnlinePage extends PaginaBase {
 
 	private void importar() {
 		Map<Acao, CotacaoAcaoOpcoes> cotacoesOnline = importador
-				.importar(getSessaoHttp().getConfiguracaoOnline());
-		getSessaoHttp().setCacheCotacoesOnline(cotacoesOnline);
+				.importar(OpcoesWebHttpSession.get().getConfiguracaoOnline());
+		OpcoesWebHttpSession.get().setCacheCotacoesOnline(cotacoesOnline);
 
 		DateTime agora = new DateTime();
 		addOrReplace(new PainelAcaoOpcoes("tabelaPetrobras", cotacoesOnline
