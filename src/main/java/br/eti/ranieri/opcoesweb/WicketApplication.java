@@ -1,12 +1,20 @@
 package br.eti.ranieri.opcoesweb;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.Session;
+import org.apache.wicket.authorization.Action;
+import org.apache.wicket.authorization.IAuthorizationStrategy;
+import org.apache.wicket.authorization.IUnauthorizedComponentInstantiationListener;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.settings.ISecuritySettings;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
 import br.eti.ranieri.opcoesweb.page.HomePage;
+import br.eti.ranieri.opcoesweb.page.LoginPage;
+import br.eti.ranieri.opcoesweb.page.PaginaBase;
 
 /**
  * Application object for your web application. If you want to run this
@@ -24,7 +32,28 @@ public class WicketApplication extends WebApplication {
 
     @Override
     protected void init() {
+
 	addComponentInstantiationListener(new SpringComponentInjector(this));
+	
+	ISecuritySettings securitySettings = getSecuritySettings();
+
+	securitySettings.setAuthorizationStrategy(new IAuthorizationStrategy() {
+	    public boolean isActionAuthorized(Component component, Action action) {
+	        return true;
+	    }
+	    public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
+		if (PaginaBase.class.isAssignableFrom(componentClass)) {
+		    return OpcoesWebHttpSession.get().isAutenticado();
+		}
+	        return true;
+	    }
+	});
+
+	securitySettings.setUnauthorizedComponentInstantiationListener(new IUnauthorizedComponentInstantiationListener() {
+	    public void onUnauthorizedInstantiation(Component component) {
+		throw new RestartResponseAtInterceptPageException(LoginPage.class);
+	    }
+	});
     }
 
     @Override

@@ -28,6 +28,21 @@ import org.springframework.util.Assert;
 import br.eti.ranieri.opcoesweb.estado.Acao;
 import br.eti.ranieri.opcoesweb.estado.CotacaoAcaoOpcoes;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Query;
+
+/**
+ * Kinds:
+ * 
+ * Ano   (key(yyyy), meses[])
+ * Mes   (key(yyyy-MM), dias[])
+ * Dia   (key(yyyy-MM-dd,acao), acao, preco, variacao, opcao1[], opcao2[])
+ * Opcao (key, serie, codigo, strike, juros, volatilidade, ...) expando
+ *  
+ * @author ranieri
+ *
+ */
 public class Persistencia implements InitializingBean {
 
 	private File arquivoPersistencia;
@@ -72,6 +87,9 @@ public class Persistencia implements InitializingBean {
 	}
 
 	public List<Integer> getAnos() {
+	    DatastoreService service = DatastoreServiceFactory.getDatastoreService();
+	    Query query = new Query("ANO");
+	    service.prepare(query).asIterable();
 		return new ArrayList<Integer>(cacheAnos);
 		// Set<Integer> anos = new HashSet<Integer>();
 		// for (LocalDate data : cotacoesHistoricas.keySet()) {

@@ -105,22 +105,22 @@ public class BlackScholes {
             for (int i = 0, count = opcoes.size(); i < count; i++) {
                 CotacaoBDI opcao = opcoes.get(i);
 
-                // preÁo de fechamento da opÁ„o
+                // pre√ßo de fechamento da op√ß√£o
                 double fechamentoOpcao = opcao.getFechamento() / 100.0;
-                // volume da opÁ„o
+                // volume da op√ß√£o
                 double volumeOpcao = opcao.getVolume() / 100.0;
-                // preÁo de exercÌcio
+                // pre√ßo de exerc√≠cio
                 double x = opcao.getPrecoExercicio() / 100.0;
-                // Quantidade de dias atÈ o vencimento, em fraÁao de ano.
-                // Adiciono um dia pois, no dia do vencimento, t n„o pode
-                // ser zero, gerando divis„o por zero
+                // Quantidade de dias at√© o vencimento, em fra√ßao de ano.
+                // Adiciono um dia pois, no dia do vencimento, t n√£o pode
+                // ser zero, gerando divis√£o por zero
                 double t = (1 + Days.daysBetween(opcao.getDataPregao(),
                         opcao.getLocalDateVencimento()).getDays()) / DIAS_POR_ANO;
 
                 double d1 = (Math.log(s / x) + (r + sigma * sigma / 2) * t) / (sigma * Math.sqrt(t));
                 double d2 = d1 - sigma * Math.sqrt(t);
 
-                // valor teÛrico da opÁ„o
+                // valor te√≥rico da op√ß√£o
                 double valorTeorico = s * probabilidadeAcumulada(d1) - x * Math.exp(-r * t) * probabilidadeAcumulada(d2);
 
                 somaVolumesDeltaPrecos += Math.abs(valorTeorico - fechamentoOpcao) * volumeOpcao;
@@ -142,7 +142,7 @@ public class BlackScholes {
 
         FuncaoDispersao funcao = new FuncaoDispersao(s, r, opcoes);
         // ////////////////////////////////////////////////
-        // Metodo de minimizacao de funcao custo È eficaz
+        // Metodo de minimizacao de funcao custo √© eficaz
         // ////////////////////////////////////////////////
         double sigmaNelder = Double.NaN;
         try {
@@ -177,29 +177,29 @@ public class BlackScholes {
         for (int i = 0, count = opcoes.size(); i < count; i++) {
             CotacaoBDI opcao = opcoes.get(i);
 
-            // preÁo de fechamento da opÁ„o
+            // pre√ßo de fechamento da op√ß√£o
             double fechamentoOpcao = opcao.getFechamento() / 100.0;
-            // volume da opÁ„o
+            // volume da op√ß√£o
             double volumeOpcao = opcao.getVolume() / 100.0;
-            // preÁo de exercÌcio
+            // pre√ßo de exerc√≠cio
             double x = opcao.getPrecoExercicio() / 100.0;
-            // Quantidade de dias atÈ o vencimento, em fraÁao de ano.
-            // Adiciono um dia pois, no dia do vencimento, t n„o pode
-            // ser zero, gerando divis„o por zero
+            // Quantidade de dias at√© o vencimento, em fra√ßao de ano.
+            // Adiciono um dia pois, no dia do vencimento, t n√£o pode
+            // ser zero, gerando divis√£o por zero
             double t = (1 + Days.daysBetween(opcao.getDataPregao(),
                     opcao.getLocalDateVencimento()).getDays()) / DIAS_POR_ANO;
 
             double d1 = (Math.log(s / x) + (r + sigma * sigma / 2) * t) / (sigma * Math.sqrt(t));
             double d2 = d1 - sigma * Math.sqrt(t);
 
-            // valor teÛrico da opÁ„o
+            // valor te√≥rico da op√ß√£o
             double valorTeorico = s * probabilidadeAcumulada(d1) - x * Math.exp(-r * t) * probabilidadeAcumulada(d2);
 
-            // grega da variaÁ„o da opÁ„o para cada $1 da aÁ„o
+            // grega da varia√ß√£o da op√ß√£o para cada $1 da a√ß√£o
             double delta = probabilidadeAcumulada(d1);
-            // grega da variaÁ„o do delta para cada $1 da aÁ„o
+            // grega da varia√ß√£o do delta para cada $1 da a√ß√£o
             double gama = densidadeFuncaoNormal(d1) / (s * sigma * Math.sqrt(t));
-            // grega da variaÁ„o da opÁ„o pelo tempo
+            // grega da varia√ß√£o da op√ß√£o pelo tempo
             double theta = (-(s * densidadeFuncaoNormal(d1) * sigma) / (2 * Math.sqrt(t)) - r * x * Math.exp(-r * t) * probabilidadeAcumulada(d2)) / 365.0;
 
             CotacaoBDI opcaoAnterior = (i == 0) ? null : opcoes.get(i-1);
@@ -271,7 +271,7 @@ public class BlackScholes {
 			List<CotacaoBDI> cotacoesOpcoesProximaSerie,
 			CotacaoBDI opcaoTeoricaProximaSerie, int quantidadeOpcoesVisivel, Double selic) {
 
-        // preÁo da aÁ„o cujas opÁıes ser„o precificadas
+        // pre√ßo da a√ß√£o cujas op√ß√µes ser√£o precificadas
         double s = acao.getFechamento() / 100.0;
         // taxa de juros livre de risco
         double r = selic;
@@ -285,27 +285,27 @@ public class BlackScholes {
     }
 
     /**
-     * @param serie serie da opÁ„o
-     * @param x preÁo de exercÌcio
-     * @param hoje data do preg„o virtual de hoje
-     * @param dataExercicio data que a opÁ„o vencer·
-     * @param s preÁo da aÁ„o
+     * @param serie serie da op√ß√£o
+     * @param x pre√ßo de exerc√≠cio
+     * @param hoje data do preg√£o virtual de hoje
+     * @param dataExercicio data que a op√ß√£o vencer√°
+     * @param s pre√ßo da a√ß√£o
      * @param r taxa de juros livre de riscos
-     * @param sigma volatilidade implÌcita
+     * @param sigma volatilidade impl√≠cita
      */
     public CotacaoOpcao calcularOpcaoTeoricaAdhoc(Serie serie, double x, LocalDate hoje, LocalDate dataExercicio, double s, double r, double sigma) {
 
 	long exercicio = dataExercicio.getDayOfMonth() + dataExercicio.getMonthOfYear() * 100L + dataExercicio.getYear() * 10000L;
-	CotacaoBDI bdi = new CotacaoBDI(hoje, null, null, "TeÛrica", 0L, 0L, 0L, (long) Math.round(x*100), exercicio);
+	CotacaoBDI bdi = new CotacaoBDI(hoje, null, null, "Te√≥rica", 0L, 0L, 0L, (long) Math.round(x*100), exercicio);
 	Map<CotacaoBDI, Map<Variavel, Number>> mapaPorOpcao = new HashMap<CotacaoBDI, Map<Variavel,Number>>();
 	calcularOpcaoTeorica(mapaPorOpcao, bdi, s, r, sigma);
-        return new CotacaoOpcao(serie, "TeÛrica", mapaPorOpcao.get(bdi));
+        return new CotacaoOpcao(serie, "Te√≥rica", mapaPorOpcao.get(bdi));
     }
 
     /**
-     * @param x preÁo de exercÌcio
-     * @param t fraÁ„o de ano de hoje atÈ a data do exercÌcio
-     * @param s preÁo da aÁ„o
+     * @param x pre√ßo de exerc√≠cio
+     * @param t fra√ß√£o de ano de hoje at√© a data do exerc√≠cio
+     * @param s pre√ßo da a√ß√£o
      * @param r taxa de juros livre de riscos
      * @param sigma volatilidade implicita
      */
@@ -321,11 +321,11 @@ public class BlackScholes {
         if (opcaoTeorica == null)
             return;
 
-        // preÁo de exercÌcio
+        // pre√ßo de exerc√≠cio
         double x = opcaoTeorica.getPrecoExercicio() / 100.0;
-        // Quantidade de dias atÈ o vencimento, em fraÁao de ano.
-        // Adiciono um dia pois, no dia do vencimento, t n„o pode
-        // ser zero, gerando divis„o por zero
+        // Quantidade de dias at√© o vencimento, em fra√ß√£o de ano.
+        // Adiciono um dia pois, no dia do vencimento, t n√£o pode
+        // ser zero, gerando divis√£o por zero
         double t = (1 + Days.daysBetween(opcaoTeorica.getDataPregao(),
                     opcaoTeorica.getLocalDateVencimento()).getDays()) / DIAS_POR_ANO;
 
@@ -338,13 +338,13 @@ public class BlackScholes {
         double probabilidadeAcumulada_d2 = probabilidadeAcumulada(d2);
         double exp_r_t = Math.exp(-r * t);
 
-        // valor teÛrico da opÁ„o
+        // valor te√≥rico da op√ß√£o
 	double valorTeorico = s * probabilidadeAcumulada_d1 - x * exp_r_t * probabilidadeAcumulada_d2;
-        // grega da variaÁ„o da opÁ„o para cada $1 da aÁ„o
+        // grega da varia√ß√£o da op√ß√£o para cada $1 da a√ß√£o
         double delta = probabilidadeAcumulada_d1;
-        // grega da variaÁ„o do delta para cada $1 da aÁ„o
+        // grega da varia√ß√£o do delta para cada $1 da a√ß√£o
 	double gama = densidadeFuncaoNormal_d1 / (s * sigma * sqrt_t);
-        // grega da variaÁ„o da opÁ„o pelo tempo
+        // grega da varia√ß√£o da op√ß√£o pelo tempo
         double theta = (-(s * densidadeFuncaoNormal_d1 * sigma) / (2 * sqrt_t) - r * x * exp_r_t * probabilidadeAcumulada_d2) / DIAS_POR_ANO;
 
         mapaPorOpcao.put(opcaoTeorica, criarMapaVariaveis(s, r, t, sigma, valorTeorico, valorTeorico, 0.0, 0.0, x, delta, gama, theta, null, null));
@@ -385,7 +385,7 @@ public class BlackScholes {
         double bosi = volumeTotalOpcoes != 0.0 ? gama * ve * volumeOpcao / volumeTotalOpcoes : 0.0;
 
         double theVE = taxaVE - (ve + theta) / precoAcao;
-        // Se o mini-NV indica que o VE nao È capaz de segurar uma
+        // Se o mini-NV indica que o VE nao √© capaz de segurar uma
         // alta de R$ 1, entao o theVE deve ser insignificante
         if (ve - delta - gama / 2 < 0.0) {
             theVE = -theVE;

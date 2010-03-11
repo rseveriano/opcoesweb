@@ -7,11 +7,12 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 
+import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
+
 public class LoginPage extends WebPage {
 
     public LoginPage() {
-	add(new FormularioLogin("formulario"));
-	add(new FeedbackPanel("feedback"));
+	add(new FormularioLogin("formulario").add(new FeedbackPanel("feedback")));
     }
 
     private static class FormularioLogin extends StatelessForm {
@@ -28,11 +29,12 @@ public class LoginPage extends WebPage {
 	@Override
 	protected void onSubmit() {
 	    if ("ranieri.severiano".equals(usuario) && "k6cP4vy".equals(senha)) {
+		OpcoesWebHttpSession.get().setAutenticado(true);
 		if (!continueToOriginalDestination()) {
 		    setResponsePage(getApplication().getHomePage());
 		}
 	    } else {
-		error("Usuario e/ou senha incorretos!");
+		error("Usuário e/ou senha incorretos!");
 	    }
 	}
 

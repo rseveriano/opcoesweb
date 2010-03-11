@@ -3,10 +3,12 @@
     <head>
         <title>OpçõesWeb</title>
     </head>
-    <body style="margin: 30% auto;">
-    	<div wicket:id="feedback">Mensagem.</div>
+    <body>
         <form wicket:id="formulario" method="POST">
-        	<table>
+        	<table style="margin: 30% auto;">
+        		<tr>
+        			<td colspan="2"><div wicket:id="feedback" style="font-weight: bold; color: darkred;"> </div></td>
+        		</tr>
         		<tr>
         			<td align="right">Usuário:</td>
         			<td><input type="text" wicket:id="usuario"/></td>

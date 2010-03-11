@@ -15,6 +15,6 @@ public class HomePage extends PaginaBase {
 	 *            Page parameters
 	 */
     public HomePage(final PageParameters parameters) {
-        add(new Label("mensagem", "Bem-vindo ao sistema de apoio à decisão de operações com opções."));
+        add(new Label("mensagem", "Bem-vindo ao sistema de apoio Ã  decisÃ£o de operaÃ§Ãµes com opÃ§Ãµes."));
     }
 }

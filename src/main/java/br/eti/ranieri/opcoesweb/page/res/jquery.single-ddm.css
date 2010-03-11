@@ -1,0 +1,64 @@
+/*!
+ * Single Drop Down Menu 1.2 - CSS Temp
+ * September 26, 2009
+ * Corey Hart @ http://www.codenothing.com
+ */
+
+.ddmenu {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ddmenu > li {
+	float: left;
+}
+
+.ddmenu > li > a {
+	display: block;
+	width: 100px;
+	text-align:center;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	text-decoration: none;
+	color: #232323;
+	font-weight: bold;
+	background-color: #f1f1f1;
+	border: 1px solid #c5c5c5;
+}
+
+.ddmenu > li > .ddmenu-hover {
+	background-color: #c5c5c5;
+	border-left: 1px solid #545454;
+}
+
+.ddmenu > li ul {
+	display: none;
+	list-style: none;
+	position: absolute;
+	margin: -1px 0 0 0;
+	z-index: 90;
+	padding: 0;
+}
+
+.ddmenu > li ul a {
+	display: block;
+	width: 152px;
+	padding: 5px;
+	border-bottom: 1px solid #545454;
+	border-right: 1px solid #545454;
+	border-left: 1px solid #545454;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 10pt;
+	color: #232323;
+	background-color: #c5c5c5;
+}
+
+.ddmenu > li ul li a.first {
+	border-top: 1px solid #545454;
+}
+
+.ddmenu > li ul a.ddchildhover {
+	background-color: #f1f1f1;
+}

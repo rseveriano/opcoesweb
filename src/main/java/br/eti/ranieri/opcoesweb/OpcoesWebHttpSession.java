@@ -15,7 +15,7 @@ public class OpcoesWebHttpSession extends WebSession {
     private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
     private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
     private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
-    private boolean autenticado = false;
+    private boolean autenticado;
 
     public OpcoesWebHttpSession(Request request) {
 	super(request);
