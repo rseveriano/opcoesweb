@@ -12,40 +12,40 @@ import br.eti.ranieri.opcoesweb.estado.CotacaoAcaoOpcoes;
 
 public class OpcoesWebHttpSession extends WebSession {
 
-    private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
-    private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
-    private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
-    private boolean autenticado;
+	private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
+	private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
+	private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
+	private boolean autenticado;
 
-    public OpcoesWebHttpSession(Request request) {
-	super(request);
-    }
+	public OpcoesWebHttpSession(Request request) {
+		super(request);
+	}
 
-    public static OpcoesWebHttpSession get() {
-	return (OpcoesWebHttpSession) WebSession.get();
-    }
+	public static OpcoesWebHttpSession get() {
+		return (OpcoesWebHttpSession) WebSession.get();
+	}
 
-    public ConfiguracaoOnline getConfiguracaoOnline() {
-	return configuracaoOnline;
-    }
+	public ConfiguracaoOnline getConfiguracaoOnline() {
+		return configuracaoOnline;
+	}
 
-    public ConfiguracaoImportacao getConfiguracaoImportacao() {
-	return configuracaoImportacao;
-    }
+	public ConfiguracaoImportacao getConfiguracaoImportacao() {
+		return configuracaoImportacao;
+	}
 
-    public Map<Acao, CotacaoAcaoOpcoes> getCacheCotacoesOnline() {
-	return cacheCotacoesOnline;
-    }
+	public Map<Acao, CotacaoAcaoOpcoes> getCacheCotacoesOnline() {
+		return cacheCotacoesOnline;
+	}
 
-    public void setCacheCotacoesOnline(Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline) {
-	this.cacheCotacoesOnline = cacheCotacoesOnline;
-    }
+	public void setCacheCotacoesOnline(Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline) {
+		this.cacheCotacoesOnline = cacheCotacoesOnline;
+	}
 
-    public boolean isAutenticado() {
-	return autenticado;
-    }
+	public boolean isAutenticado() {
+		return autenticado;
+	}
 
-    public void setAutenticado(boolean autenticado) {
-	this.autenticado = autenticado;
-    }
+	public void setAutenticado(boolean autenticado) {
+		this.autenticado = autenticado;
+	}
 }

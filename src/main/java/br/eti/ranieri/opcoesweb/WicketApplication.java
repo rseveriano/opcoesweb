@@ -8,7 +8,9 @@ import org.apache.wicket.Session;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authorization.IAuthorizationStrategy;
 import org.apache.wicket.authorization.IUnauthorizedComponentInstantiationListener;
+import org.apache.wicket.protocol.http.HttpSessionStore;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.session.ISessionStore;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
@@ -24,47 +26,56 @@ import br.eti.ranieri.opcoesweb.page.PaginaBase;
  */
 public class WicketApplication extends WebApplication {
 
-    /**
-     * Constructor
-     */
-    public WicketApplication() {
-    }
+	/**
+	 * Constructor
+	 */
+	public WicketApplication() {
+	}
 
-    @Override
-    protected void init() {
+	@Override
+	protected void init() {
+		super.init();
+		this.getResourceSettings().setResourcePollFrequency(null);
 
-	addComponentInstantiationListener(new SpringComponentInjector(this));
-	
-	ISecuritySettings securitySettings = getSecuritySettings();
+		addComponentInstantiationListener(new SpringComponentInjector(this));
 
-	securitySettings.setAuthorizationStrategy(new IAuthorizationStrategy() {
-	    public boolean isActionAuthorized(Component component, Action action) {
-	        return true;
-	    }
-	    public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
-		if (PaginaBase.class.isAssignableFrom(componentClass)) {
-		    return OpcoesWebHttpSession.get().isAutenticado();
-		}
-	        return true;
-	    }
-	});
+		ISecuritySettings securitySettings = getSecuritySettings();
 
-	securitySettings.setUnauthorizedComponentInstantiationListener(new IUnauthorizedComponentInstantiationListener() {
-	    public void onUnauthorizedInstantiation(Component component) {
-		throw new RestartResponseAtInterceptPageException(LoginPage.class);
-	    }
-	});
-    }
+		securitySettings.setAuthorizationStrategy(new IAuthorizationStrategy() {
+			public boolean isActionAuthorized(Component component, Action action) {
+				return true;
+			}
 
-    @Override
-    public Session newSession(Request request, Response response) {
-	return new OpcoesWebHttpSession(request);
-    }
+			public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
+				if (PaginaBase.class.isAssignableFrom(componentClass)) {
+					return OpcoesWebHttpSession.get().isAutenticado();
+				}
+				return true;
+			}
+		});
 
-    /**
-     * @see org.apache.wicket.Application#getHomePage()
-     */
-    public Class<HomePage> getHomePage() {
-	return HomePage.class;
-    }
+		securitySettings.setUnauthorizedComponentInstantiationListener( //
+				new IUnauthorizedComponentInstantiationListener() {
+					public void onUnauthorizedInstantiation(Component component) {
+						throw new RestartResponseAtInterceptPageException(LoginPage.class);
+					}
+				});
+	}
+
+	@Override
+	public Session newSession(Request request, Response response) {
+		return new OpcoesWebHttpSession(request);
+	}
+
+	@Override
+	protected ISessionStore newSessionStore() {
+		return new HttpSessionStore(this);
+	}
+
+	/**
+	 * @see org.apache.wicket.Application#getHomePage()
+	 */
+	public Class<HomePage> getHomePage() {
+		return HomePage.class;
+	}
 }
