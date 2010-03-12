@@ -102,7 +102,7 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 
 			String xml = baixarCotacoes(configuracao, codigos);
 
-			// Transforma XML em Cotacao's de ações apenas
+			// Transforma XML em Cotacao's de aÃ§Ãµes apenas
 			List<CotacaoBDI> cotacoesAcoes = xmlBanifParser.parse(xml);
 
 			for (Acao acao : Acao.values()) {
@@ -146,11 +146,11 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 
 		CotacaoBDI opcaoTeorica1 = new CotacaoBDI(hoje,
 				CodigoBDI.OPCOES_DE_COMPRA, TipoMercadoBDI.OPCOES_DE_COMPRA,
-				"Teórica", 0, 0, 0, ultimaCotacaoAcao.getFechamento(),
+				"TeÃ³rica", 0, 0, 0, ultimaCotacaoAcao.getFechamento(),
 				opcoesSerie1.iterator().next().getDataVencimento());
 		CotacaoBDI opcaoTeorica2 = new CotacaoBDI(hoje,
 				CodigoBDI.OPCOES_DE_COMPRA, TipoMercadoBDI.OPCOES_DE_COMPRA,
-				"Teórica", 0, 0, 0, ultimaCotacaoAcao.getFechamento(),
+				"TeÃ³rica", 0, 0, 0, ultimaCotacaoAcao.getFechamento(),
 				opcoesSerie2.iterator().next().getDataVencimento());
 
 		Double selic = taxaSelic.getSelic(hoje);
@@ -163,7 +163,7 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 	List<CotacaoBDI> obterOpcoes(ConfiguracaoOnline configuracao, Acao acao,
 			Serie serie, LocalDate agora) throws Exception {
 		// Obtem a ultima cotacao historica para
-		// saber quais opções tinham maior volume
+		// saber quais opÃ§Ãµes tinham maior volume
 		CotacaoAcaoOpcoes acaoOpcoes = persistencia.obterUltima().get(acao);
 		// Decide se o parametro Serie se refere a
 		// getOpcoesSerie1() ou getOpcoesSerie2()
@@ -175,11 +175,11 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 		}
 		opcoes = Collections2.filter(opcoes, new Predicate<CotacaoOpcao>() {
 			public boolean apply(CotacaoOpcao opcao) {
-				return "Teórica".equals(opcao.getCodigo()) == false;
+				return "TeÃ³rica".equals(opcao.getCodigo()) == false;
 			}
 		});
-		// Removida a opção teórica, baixo as cotações
-		// a partir do código das opções remanescentes
+		// Removida a opÃ§Ã£o TeÃ³rica, baixo as cotaÃ§Ãµes
+		// a partir do cÃ³digo das opÃ§Ãµes remanescentes
 		String codigos = StringUtils.join(Lists.transform(
 				new ArrayList<CotacaoOpcao>(opcoes),
 				new Function<CotacaoOpcao, String>() {
@@ -189,10 +189,10 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 				}), ";");
 
 		String xml = baixarCotacoes(configuracao, codigos);
-		// Transforma XML em Cotacao's de opções apenas
+		// Transforma XML em Cotacao's de opÃ§Ãµes apenas
 		List<CotacaoBDI> cotacoesOpcoes = xmlBanifParser.parse(xml);
 
-		// Define a data de hoje para todas as cotações recem-baixadas
+		// Define a data de hoje para todas as cotaÃ§Ãµes recem-baixadas
 		for (CotacaoBDI cotacao : cotacoesOpcoes) {
 			cotacao.setDataPregao(agora);
 		}
@@ -210,7 +210,7 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 
 		ResponseHandler<String> responseHandler = new BasicResponseHandler();
 		HttpHost destino = new HttpHost("www.banifinvest.com.br", 443, "https");
-		// Baixa o XML com as cotações das ações
+		// Baixa o XML com as cotaÃ§Ãµes das aÃ§Ãµes
 		HttpRequest request = new BasicHttpRequest("GET",
 				"/tr/bi/cotacoes/cotacoes_ajax_resultado.jsp?busca=" + codigos,
 				HttpVersion.HTTP_1_1);

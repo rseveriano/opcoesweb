@@ -28,19 +28,13 @@ public class CotacaoAcaoOpcoes implements Serializable {
 	private CotacaoAcao cotacaoAcao;
 	private List<CotacaoOpcao> opcoesSerie1;
 	private List<CotacaoOpcao> opcoesSerie2;
-//	private CotacaoOpcoes serie1;
-//	private CotacaoOpcoes serie2;
 
-//	public CotacaoAcaoOpcoes(CotacaoAcao acao, CotacaoOpcoes serie1,
-//			CotacaoOpcoes serie2) {
 	public CotacaoAcaoOpcoes(CotacaoAcao acao, List<CotacaoOpcao> opcoesSerie1,
 			List<CotacaoOpcao> opcoesSerie2) {
 
 		this.cotacaoAcao = acao;
 		this.opcoesSerie1 = opcoesSerie1;
 		this.opcoesSerie2 = opcoesSerie2;
-//		this.serie1 = serie1;
-//		this.serie2 = serie2;
 	}
 
 	public CotacaoAcao getCotacaoAcao() {
@@ -54,13 +48,5 @@ public class CotacaoAcaoOpcoes implements Serializable {
 	public List<CotacaoOpcao> getOpcoesSerie2() {
 		return opcoesSerie2;
 	}
-
-//	public CotacaoOpcoes getSerie1() {
-//		return serie1;
-//	}
-//
-//	public CotacaoOpcoes getSerie2() {
-//		return serie2;
-//	}
 
 }

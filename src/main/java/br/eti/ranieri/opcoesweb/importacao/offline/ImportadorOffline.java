@@ -86,7 +86,6 @@ public class ImportadorOffline {
     			}
     		}
     	}
-    	persistencia.escreverCotacoesHistoricas();
     }
     
     private void processarZip(File arquivo, ConfiguracaoImportacao configuracaoImportacao) throws Exception {

@@ -44,7 +44,7 @@ public class SimuladorTeorico {
 		}
 		List<Entry<LocalDate, CotacaoAcaoOpcoes>> cotacoes = persistencia
 				.getCotacoes(config.acao, config.dataInicial, config.dataFinal);
-		// Datas de exercicio das opÁıes
+		// Datas de exercicio das op√ß√µes
 		Map<Serie, LocalDate> vencimentos = Serie.getVencimentosPorPeriodo(
 				config.dataInicial, config.dataFinal);
 
@@ -73,22 +73,22 @@ public class SimuladorTeorico {
 					dataVencimentoOpcaoVendida = vencimentos.get(carteira.opcaoVendida.getSerie());
 				
 				int acao = random.nextInt(3);
-				// acao == 0: n„o faz nada ou È exercido e fica fora
-				// acao == 1: rola nesta sÈrie ou È exercido e lanÁa a prÛxima
-				// acao == 2: rola na prÛxima sÈrie
+				// acao == 0: n√£o faz nada ou √© exercido e fica fora
+				// acao == 1: rola nesta s√©rie ou √© exercido e lan√ßa a pr√≥xima
+				// acao == 2: rola na pr√≥xima s√©rie
 				if (acao == 0) {
-					// o vencimento È hoje ou j· passou (por conta de feriado)
+					// o vencimento √© hoje ou j√° passou (por conta de feriado)
 					if (dataVencimentoOpcaoVendida != null && dataVencimentoOpcaoVendida.isAfter(data) == false) {
 						carteira.serExercida(data, precoAcao);
 						historico.registrarExercicio(data, cotacaoHoje.getCotacaoAcao(), carteira.opcaoVendida);
 					}
 					
 				} else if (acao == 1) {
-					// o vencimento È hoje ou j· passou (por conta de feriado)
+					// o vencimento √© hoje ou j√° passou (por conta de feriado)
 					if (dataVencimentoOpcaoVendida != null && dataVencimentoOpcaoVendida.isAfter(data) == false) {
 						carteira.serExercida(data, precoAcao);
 						historico.registrarExercicio(data, cotacaoHoje.getCotacaoAcao(), carteira.opcaoVendida);
-						// opcao teorica para onde se rolar·
+						// opcao teorica para onde se rolar√°
 						CotacaoOpcao teoricaNova = localizarOpcaoTeorica(cotacaoHoje.getOpcoesSerie2());
 						double precoTeoricaVelha = calcularPrecoTeoricoAtual(precoAcao, teoricaNova, carteira.opcaoVendida);
 						CotacaoOpcao teoricaVelha = carteira.opcaoVendida;
@@ -97,7 +97,7 @@ public class SimuladorTeorico {
 						}
 						historico.registrarRolamento(data, teoricaNova, teoricaVelha, precoTeoricaVelha, -1);
 					} else {
-						// opcao teorica para onde se rolar·
+						// opcao teorica para onde se rolar√°
 						CotacaoOpcao teoricaNova = localizarOpcaoTeorica(cotacaoHoje.getOpcoesSerie1());
 						double precoTeoricaVelha = calcularPrecoTeoricoAtual(precoAcao, teoricaNova, carteira.opcaoVendida);
 						CotacaoOpcao teoricaVelha = carteira.opcaoVendida;
@@ -108,7 +108,7 @@ public class SimuladorTeorico {
 					}
 					
 				} else if (acao == 2) {
-					// opcao teorica para onde se rolar·
+					// opcao teorica para onde se rolar√°
 					CotacaoOpcao teoricaNova = localizarOpcaoTeorica(cotacaoHoje.getOpcoesSerie2());
 					double precoTeoricaVelha = calcularPrecoTeoricoAtual(precoAcao, teoricaNova, carteira.opcaoVendida);
 					CotacaoOpcao teoricaVelha = carteira.opcaoVendida;
@@ -132,7 +132,7 @@ public class SimuladorTeorico {
 			}
 		}
 		
-		// Exibe as informaÁıes da melhor carteira simulada
+		// Exibe as informa√ß√µes da melhor carteira simulada
 		String serie = "";
 		double precoOpcao = 0.0;
 		if (melhorCarteira.opcaoVendida != null) {
@@ -142,11 +142,11 @@ public class SimuladorTeorico {
 		System.out
 				.printf(
 						"Melhor carteira tem:\n" +
-						"\t%d aÁıes\n" +
-						"\t%d opÁıes da %s vendida a %.2f\n" +
+						"\t%d a√ß√µes\n" +
+						"\t%d op√ß√µes da %s vendida a %.2f\n" +
 						"\tsaldo = %.2f\n" +
 						"\tTOTAL = %.2f\n" +
-						"\tCarteiras bem sucedidas %d / Total de simulaÁıes %d\n",
+						"\tCarteiras bem sucedidas %d / Total de simula√ß√µes %d\n",
 						melhorCarteira.custodiaAcoes,
 						melhorCarteira.quantidadeOpcaoVendida,
 						serie, precoOpcao,

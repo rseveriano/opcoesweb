@@ -122,7 +122,7 @@ public class SimuladorManual {
 	    List<CotacaoOpcao> opcoes) {
 
 	for (CotacaoOpcao cotacaoOpcao : opcoes) {
-	    // Não popula o mapa se for opção teórica
+	    // NÃ£o popula o mapa se for opcao teorica
 	    if (cotacaoOpcao.getVariaveis().get(Variavel.VOLUME).doubleValue() == 0.0)
 		continue;
 	    Map<LocalDate, PrecoDataCodigo> precosPorData = precosPorDatasPorOpcao.get(cotacaoOpcao);

@@ -58,7 +58,7 @@ public class CarteiraTest extends TestCase {
 					random.nextDouble() * 0.008));
 		}
 		// Coloca a opcao Teorica com volume zero e maiores indicadores
-		opcoes.add(criarOpcao(Serie.A, "Te髍ica", null, null, 0L, 0.07, 0.015));
+		opcoes.add(criarOpcao(Serie.A, "Te贸rica", null, null, 0L, 0.07, 0.015));
 
 		// Coloca a opcao real com maior Taxa VE entre as nao-teoricas
 		CotacaoOpcao opcaoMaiorTaxaVE = criarOpcao(Serie.A, "PETRA26",
@@ -175,13 +175,13 @@ public class CarteiraTest extends TestCase {
 		opcoesA.add(new CotacaoOpcao(Serie.A, "PETRA28", new HashMap<Variavel, Number>()));
 		opcoesA.add(petrA30);
 		opcoesA.add(petrA36);
-		opcoesA.add(new CotacaoOpcao(Serie.A, "Te髍ica", new HashMap<Variavel, Number>()));
+		opcoesA.add(new CotacaoOpcao(Serie.A, "Te贸rica", new HashMap<Variavel, Number>()));
 		
 		final CotacaoOpcao petrB30 = criarOpcao(Serie.B, "PETRB30", 0.70, 30.0, 582376L, null, null);
 		final List<CotacaoOpcao> opcoesB = new ArrayList<CotacaoOpcao>();
 		opcoesB.add(new CotacaoOpcao(Serie.B, "PETRB28", new HashMap<Variavel, Number>()));
 		opcoesB.add(petrB30);
-		opcoesB.add(new CotacaoOpcao(Serie.B, "Te髍ica", new HashMap<Variavel, Number>()));
+		opcoesB.add(new CotacaoOpcao(Serie.B, "Te贸rica", new HashMap<Variavel, Number>()));
 		
 		final CotacaoAcao petr32 = new CotacaoAcao(Acao.PETROBRAS, 32.0, 0.0);
 
@@ -273,7 +273,7 @@ public class CarteiraTest extends TestCase {
 		opcoesA.add(petrA30);
 		opcoesA.add(petrA32);
 		opcoesA.add(petrA36);
-		opcoesA.add(criarOpcao(Serie.A, "Te髍ica", 30.07, 30.07, 0L, 0.06, 0.0011));
+		opcoesA.add(criarOpcao(Serie.A, "Te贸rica", 30.07, 30.07, 0L, 0.06, 0.0011));
 
 		final CotacaoOpcao petrB30 = criarOpcao(Serie.B, "PETRB30", 0.70, 30.0,  98276L, 0.070, 0.0012);
 		final CotacaoOpcao petrB32 = criarOpcao(Serie.B, "PETRB32", 1.62, 32.0, 582376L, 0.075, 0.0010);
@@ -283,7 +283,7 @@ public class CarteiraTest extends TestCase {
 		opcoesB.add(petrB30);
 		opcoesB.add(petrB32);
 		opcoesB.add(petrB34);
-		opcoesB.add(criarOpcao(Serie.B, "Te髍ica", 32.07, 32.07, 0L, 0.076, 0.00121));
+		opcoesB.add(criarOpcao(Serie.B, "Te贸rica", 32.07, 32.07, 0L, 0.076, 0.00121));
 
 		final CotacaoAcao petr32 = new CotacaoAcao(Acao.PETROBRAS, 32.0, 0.0);
 

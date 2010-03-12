@@ -1,5 +1,6 @@
 package br.eti.ranieri.opcoesweb.persistencia;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +19,40 @@ public class Mes {
     private Integer mes;
     private Collection<Dia> dias;
 
+    public Mes(Entity entity) {
+	this(entity.getKey());
+	
+	this.dias = new ArrayList<Dia>();
+	Collection<Key> keysDias = (Collection<Key>) entity.getProperty(DIAS);
+	if (keysDias != null) {
+	    for (Key key : keysDias) {
+		this.dias.add(new Dia(key));
+	    }
+	}
+    }
+    
+    public Mes(Integer ano, Integer mes) {
+	this.ano = ano;
+	this.mes = mes;
+    }
+
+    public Mes(Key key) {
+	this.ano = extractYearFromKey(key);
+	this.mes = extractMonthFromKey(key);
+    }
+
+    public Integer getAno() {
+	return ano;
+    }
+    
+    public Integer getMes() {
+	return mes;
+    }
+    
+    public Collection<Dia> getDias() {
+	return dias;
+    }
+    
     public Key toKey() {
 	Assert.notNull(ano, "Ano não pode ser nulo");
 	Assert.notNull(mes, "Mes não pode ser nulo");
@@ -39,4 +74,15 @@ public class Mes {
 
 	return entity;
     }
+
+    public static Integer extractYearFromKey(Key key) {
+	Assert.notNull(key, "Chave não pode ser nula");
+	return new Long(key.getId() / 100).intValue();
+    }
+
+    public static Integer extractMonthFromKey(Key key) {
+	Assert.notNull(key, "Chave não pode ser nula");
+	return new Long(key.getId() % 100).intValue();
+    }
+
 }
