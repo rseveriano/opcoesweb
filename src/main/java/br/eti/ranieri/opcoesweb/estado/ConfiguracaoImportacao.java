@@ -4,7 +4,7 @@ import org.apache.wicket.IClusterable;
 
 public class ConfiguracaoImportacao implements IClusterable  {
 
-	public final Integer QUANTIDADE_MAXIMA_OPCOES_POR_ACAO_POR_DIA = 7;
+	public static final Integer QUANTIDADE_MAXIMA_OPCOES_POR_ACAO_POR_DIA = 7;
 
 	private Integer quantidadeOpcoesPorAcaoPorDia;
 

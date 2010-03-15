@@ -27,7 +27,6 @@ import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.validation.validator.UrlValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 import br.eti.ranieri.opcoesweb.estado.ConfiguracaoOnline;

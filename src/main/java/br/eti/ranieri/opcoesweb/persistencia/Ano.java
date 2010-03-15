@@ -1,7 +1,5 @@
 package br.eti.ranieri.opcoesweb.persistencia;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.util.Assert;
@@ -9,25 +7,24 @@ import org.springframework.util.Assert;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class Ano {
 
 	public static final String KIND = Ano.class.getName();
-	public static final String MESES = "meses";
+	public static final String MES_PREFIX = "MES_";
 
 	private Integer ano;
-	private Set<Mes> meses;
+	private Set<Integer> meses;
 
 	public Ano(Entity entity) {
 		this.ano = extractYearFromKey(entity.getKey());
 
 		this.meses = Sets.newHashSet();
-		Collection<Key> keysMeses = (Collection<Key>) entity.getProperty(MESES);
-		if (keysMeses != null) {
-			for (Key key : keysMeses) {
-				this.meses.add(new Mes(key));
+		for (int i = 1; i <= 12; i++) {
+			Object property = entity.getProperty(String.format("%s%02d", MES_PREFIX, i));
+			if (property != null) {
+				meses.add((Integer) property);
 			}
 		}
 	}
@@ -40,11 +37,11 @@ public class Ano {
 		return ano;
 	}
 
-	public Collection<Mes> getMeses() {
+	public Set<Integer> getMeses() {
 		return meses;
 	}
 
-	public void addMes(Mes mes) {
+	public void addMes(Integer mes) {
 		if (meses == null) {
 			meses = Sets.newHashSet(mes);
 		} else {
@@ -61,13 +58,9 @@ public class Ano {
 		Key key = toKey();
 		Entity entity = new Entity(key);
 
-		List<Key> keysMeses = Lists.newArrayList();
-		if (meses != null) {
-			for (Mes mes : meses) {
-				keysMeses.add(mes.toKey());
-			}
+		for (Integer mes : meses) {
+			entity.setProperty(String.format("%s%02d", MES_PREFIX, mes), mes);
 		}
-		entity.setProperty(MESES, keysMeses);
 
 		return entity;
 	}

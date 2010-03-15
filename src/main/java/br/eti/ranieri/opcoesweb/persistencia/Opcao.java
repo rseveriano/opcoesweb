@@ -12,17 +12,16 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Maps;
 
 public class Opcao {
+	public static final String KIND = Opcao.class.getName();
 	public static final String SERIE = "serie";
 	public static final String CODIGO = "codigo";
 	public static final String VAR_PREFIX = "VAR_";
 
-	private Key key;
 	private Serie serie;
 	private String codigo;
 	private Map<Variavel, Number> variaveis;
 
 	public Opcao(Entity entity) {
-		this.key = entity.getKey();
 		this.serie = Serie.values()[(Integer) entity.getProperty(SERIE)];
 		this.codigo = (String) entity.getProperty(CODIGO);
 
@@ -38,10 +37,6 @@ public class Opcao {
 		this.variaveis = Maps.newHashMap(cotacao.getVariaveis());
 	}
 
-	public Key getKey() {
-		return key;
-	}
-
 	public Serie getSerie() {
 		return serie;
 	}
@@ -54,8 +49,8 @@ public class Opcao {
 		return variaveis;
 	}
 
-	public Entity toEntity() {
-		Entity entity = new Entity(getClass().getName());
+	public Entity toEntity(Key parent) {
+		Entity entity = new Entity(KIND, parent);
 
 		entity.setProperty(SERIE, serie.ordinal());
 		entity.setProperty(CODIGO, codigo);

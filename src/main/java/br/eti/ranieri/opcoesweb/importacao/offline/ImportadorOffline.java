@@ -17,20 +17,18 @@
 
 package br.eti.ranieri.opcoesweb.importacao.offline;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
@@ -42,16 +40,14 @@ import org.springframework.stereotype.Service;
 import br.eti.ranieri.opcoesweb.blackscholes.BlackScholes;
 import br.eti.ranieri.opcoesweb.estado.Acao;
 import br.eti.ranieri.opcoesweb.estado.ConfiguracaoImportacao;
+import br.eti.ranieri.opcoesweb.estado.CotacaoAcaoOpcoes;
 import br.eti.ranieri.opcoesweb.estado.Serie;
 import br.eti.ranieri.opcoesweb.importacao.TaxaSelic;
 import br.eti.ranieri.opcoesweb.importacao.offline.parser.BovespaParser;
 import br.eti.ranieri.opcoesweb.persistencia.Persistencia;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-
 /**
- *
+ * 
  * @author ranieri
  */
 @Service
@@ -67,162 +63,168 @@ public class ImportadorOffline {
 	@Autowired
 	private TaxaSelic taxaSelic;
 
-	private final transient Pattern bdiPattern = Pattern.compile("bdi\\d{4}\\.zip");
+	public void importar(URL url, ConfiguracaoImportacao configuracaoImportacao) throws Exception {
 
-    public void importar(String localizacao, ConfiguracaoImportacao configuracaoImportacao) throws Exception {
-    	File arquivo = new File(localizacao);
-    	if (arquivo.exists() == false) {
-    		throw new FileNotFoundException("Arquivo [" + localizacao + "] nao foi encontrado");
-    	}
-    	if (arquivo.isFile()) {
-    		if (arquivo.canRead() == false) {
-    			throw new FileNotFoundException("Arquivo [" + localizacao + "] nao pode ser lido");
-    		}
-    		processarZip(arquivo, configuracaoImportacao);
-    	} else {
-    		for (File arq : arquivo.listFiles()) {
-    			if (bdiPattern.matcher(arq.getName()).matches()) {
-    				processarZip(arq, configuracaoImportacao);
-    			}
-    		}
-    	}
-    }
-    
-    private void processarZip(File arquivo, ConfiguracaoImportacao configuracaoImportacao) throws Exception {
-		ZipFile zip = null;
-		InputStream stream = null;
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			throw new Exception("Requisição HTTP retornou código de erro: " + connection.getResponseCode());
+		}
+		
 		List<CotacaoBDI> cotacoes = null;
-
+		ZipInputStream zip = null;
 		try {
-			zip = new ZipFile(arquivo, ZipFile.OPEN_READ);
-			
-			for (ZipEntry entry : Lists.newArrayList(Iterators.forEnumeration(zip.entries()))) {
+			zip = new ZipInputStream(connection.getInputStream());
+			ZipEntry entry;
+			while ((entry = zip.getNextEntry()) != null) {
 				if ("BDIN".equals(entry.getName())) {
-					stream = zip.getInputStream(entry);
-					cotacoes = parser.parseBDI(zip.getInputStream(entry));
+					cotacoes = parser.parseBDI(zip);
+					zip.closeEntry();
 					break;
-				} else if (entry.getName().startsWith("COTAHIST_") && entry.getName().endsWith(".TXT")) {
-					stream = zip.getInputStream(entry);
-					cotacoes = parser.parseHistorico(zip.getInputStream(entry));
+				} else if (entry.getName().startsWith("COTAHIST_")
+						&& entry.getName().endsWith(".TXT")) {
+					cotacoes = parser.parseHistorico(zip);
+					zip.closeEntry();
 					break;
 				}
 			}
-			
-			if (cotacoes == null) {
-				throw new Exception(
-						"Nao existe o arquivo BDIN ou COTAHIST_*.TXT dentro de ["
-								+ arquivo.getPath() + "]");
+			zip.close();
+		} catch (ZipException e) {
+			log.error("Formato invalido de arquivo zip", e);
+		} catch (IOException e) {
+			log.error("Erro de leitura do arquivo zip", e);
+		} finally {
+			if (zip != null)
+				IOUtils.closeQuietly(zip);
+		}
+
+		calcularBlackScholes(cotacoes, configuracaoImportacao);
+	}
+
+	private void calcularBlackScholes(List<CotacaoBDI> cotacoes,
+			ConfiguracaoImportacao configuracaoImportacao) throws Exception {
+		if (cotacoes == null)
+			return;
+
+		// Organiza as cotacoes por data e acao. As cotacoes da
+		// acao e das opcoes ficam, por enquanto, na mesma lista
+		SortedMap<LocalDate, Map<Acao, List<CotacaoBDI>>> diaAcaoOpcoes = new TreeMap<LocalDate, Map<Acao, List<CotacaoBDI>>>();
+		for (CotacaoBDI cotacao : cotacoes) {
+			LocalDate data = cotacao.getDataPregao();
+
+			Map<Acao, List<CotacaoBDI>> cotacoesPorAcao = new HashMap<Acao, List<CotacaoBDI>>();
+			if (diaAcaoOpcoes.containsKey(data)) {
+				cotacoesPorAcao = diaAcaoOpcoes.get(data);
+			} else {
+				diaAcaoOpcoes.put(data, cotacoesPorAcao);
 			}
 
-		} catch (ZipException e) {
-			throw new Exception("Arquivo [" + arquivo.getPath()
-					+ "] nao esta no formato ZIP", e);
-		} catch (IOException e) {
-			throw new Exception("Nao foi possivel ler o arquivo ["
-					+ arquivo.getPath() + "]", e);
-		} finally {
-			IOUtils.closeQuietly(stream);
-			try {
-				if (zip != null)
-					zip.close();
-			} catch (Exception e) {
+			Acao acao = null;
+			if (cotacao.getCodigoNegociacao().startsWith("PETR")) {
+				acao = Acao.PETROBRAS;
+			} else if (cotacao.getCodigoNegociacao().startsWith("VALE")) {
+				acao = Acao.VALE;
+			} else {
+				log.error("Codigo de negociacao [{}] nao esta "
+						+ "vinculada a VALE e nem a PETROBRAS.", cotacao
+						.getCodigoNegociacao());
+				continue;
+			}
+
+			List<CotacaoBDI> cotacoesAcaoOpcoes = new ArrayList<CotacaoBDI>();
+			if (cotacoesPorAcao.containsKey(acao)) {
+				cotacoesAcaoOpcoes = cotacoesPorAcao.get(acao);
+			} else {
+				cotacoesPorAcao.put(acao, cotacoesAcaoOpcoes);
+			}
+
+			cotacoesAcaoOpcoes.add(cotacao);
+		}
+
+		// Agora separa, para cada dia e para cada acao, as
+		// cotacoes da acao, das opcoes que vencem este mes
+		// e das opcoes que vencem no proximo mes.
+		// 
+		// Para cada dia e para cada acao, calcula o Black&Scholes
+		// em cada dupla acao e lista de opcoes
+		for (LocalDate data : diaAcaoOpcoes.keySet()) {
+
+			Serie serieAtualOpcoes = Serie.getSerieAtualPorData(data);
+			Serie proximaSerieOpcoes = Serie.getProximaSeriePorData(data);
+			Double selic = taxaSelic.getSelic(data);
+
+			for (Acao acao : diaAcaoOpcoes.get(data).keySet()) {
+
+				CotacaoBDI cotacaoAcao = null;
+				List<CotacaoBDI> cotacoesOpcoesSerie1 = new ArrayList<CotacaoBDI>();
+				List<CotacaoBDI> cotacoesOpcoesSerie2 = new ArrayList<CotacaoBDI>();
+
+				for (CotacaoBDI cotacao : diaAcaoOpcoes.get(data).get(acao)) {
+					if (CodigoBDI.LOTE_PADRAO.equals(cotacao.getCodigoBdi())
+							&& TipoMercadoBDI.MERCADO_A_VISTA.equals(cotacao
+									.getTipoMercado())) {
+						if (cotacaoAcao != null)
+							log.error("Sobrescreveu cotacao [{}] com [{}].",
+									cotacaoAcao, cotacao);
+						cotacaoAcao = cotacao;
+					} else if (CodigoBDI.OPCOES_DE_COMPRA.equals(cotacao
+							.getCodigoBdi())
+							&& TipoMercadoBDI.OPCOES_DE_COMPRA.equals(cotacao
+									.getTipoMercado())) {
+						if (serieAtualOpcoes.isSerieDaOpcao(cotacao
+								.getCodigoNegociacao())) {
+							cotacoesOpcoesSerie1.add(cotacao);
+						} else if (proximaSerieOpcoes.isSerieDaOpcao(cotacao
+								.getCodigoNegociacao())) {
+							cotacoesOpcoesSerie2.add(cotacao);
+						}
+					}
+				}
+
+				if (cotacaoAcao == null) {
+					log.error("Nao foi encontrada cotacao de "
+							+ "acao [{}] no dia [{}].", acao.getCodigo(), data);
+					continue;
+				}
+				if (cotacoesOpcoesSerie1.size() == 0) {
+					log.error("Nao foram encontradas cotacoes de opcoes "
+							+ "de [{}] no dia [{}] para vencer neste mes.",
+							acao.getCodigo(), data);
+					continue;
+				}
+				if (cotacoesOpcoesSerie2.size() == 0) {
+					log.error("Nao foram encontradas cotacoes de opcoes "
+							+ "de [{}] no dia [{}] para vencer proximo mes.",
+							acao.getCodigo(), data);
+					continue;
+				}
+
+				CotacaoBDI opcaoTeorica1 = new CotacaoBDI(data, //
+						CodigoBDI.OPCOES_DE_COMPRA, //
+						TipoMercadoBDI.OPCOES_DE_COMPRA, //
+						"Teorica", 0, 0, 0, //
+						cotacaoAcao.getFechamento(), //
+						cotacoesOpcoesSerie1.iterator().next()
+								.getDataVencimento());
+
+				CotacaoBDI opcaoTeorica2 = new CotacaoBDI(data, //
+						CodigoBDI.OPCOES_DE_COMPRA, //
+						TipoMercadoBDI.OPCOES_DE_COMPRA, //
+						"Teorica", 0, 0, 0, //
+						cotacaoAcao.getFechamento(), //
+						cotacoesOpcoesSerie2.iterator().next()
+								.getDataVencimento());
+
+				Integer opcoesPorDia = configuracaoImportacao
+						.getQuantidadeOpcoesPorAcaoPorDia();
+
+				CotacaoAcaoOpcoes cotacao = blackScholes.calcularIndices(
+						cotacaoAcao, serieAtualOpcoes, cotacoesOpcoesSerie1,
+						opcaoTeorica1, proximaSerieOpcoes,
+						cotacoesOpcoesSerie2, opcaoTeorica2, opcoesPorDia,
+						selic);
+
+				persistencia.incluirCotacaoHistorica(data, acao, cotacao);
 			}
 		}
-		
-		calcularBlackScholes(cotacoes, configuracaoImportacao);
-    }
-
-    private void calcularBlackScholes(List<CotacaoBDI> cotacoes, ConfiguracaoImportacao configuracaoImportacao) throws Exception {
-    	if (cotacoes == null)
-    		return;
-
-    	// Organiza as cotacoes por data e acao. As cotacoes da
-    	// acao e das opcoes ficam, por enquanto, na mesma lista
-    	SortedMap<LocalDate, Map<Acao, List<CotacaoBDI>>> diaAcaoOpcoes = new TreeMap<LocalDate, Map<Acao,List<CotacaoBDI>>>();
-    	for (CotacaoBDI cotacao : cotacoes) {
-    		LocalDate data = cotacao.getDataPregao();
-
-    		Map<Acao, List<CotacaoBDI>> cotacoesPorAcao = new HashMap<Acao, List<CotacaoBDI>>();
-    		if (diaAcaoOpcoes.containsKey(data)) {
-    			cotacoesPorAcao = diaAcaoOpcoes.get(data);
-    		} else {
-    			diaAcaoOpcoes.put(data, cotacoesPorAcao);
-    		}
-
-    		Acao acao = null;
-    		if (cotacao.getCodigoNegociacao().startsWith("PETR")) {
-    			acao = Acao.PETROBRAS;
-    		} else if (cotacao.getCodigoNegociacao().startsWith("VALE")) {
-    			acao = Acao.VALE;
-    		} else {
-    			log.error("Codigo de negociacao [{}] nao esta vinculada a VALE e nem a PETROBRAS.", cotacao.getCodigoNegociacao());
-    			continue;
-    		}
-    		
-    		List<CotacaoBDI> cotacoesAcaoOpcoes = new ArrayList<CotacaoBDI>();
-    		if (cotacoesPorAcao.containsKey(acao)) {
-    			cotacoesAcaoOpcoes = cotacoesPorAcao.get(acao);
-    		} else {
-    			cotacoesPorAcao.put(acao, cotacoesAcaoOpcoes);
-    		}
-    		
-    		cotacoesAcaoOpcoes.add(cotacao);
-    	}
-
-    	// Agora separa, para cada dia e para cada acao, as
-    	// cotacoes da acao, das opcoes que vencem este mes
-    	// e das opcoes que vencem no proximo mes.
-    	// 
-    	// Para cada dia e para cada acao, calcula o Black&Scholes
-    	// em cada dupla acao e lista de opcoes 
-    	for (LocalDate data : diaAcaoOpcoes.keySet()) {
-    		
-    		Serie serieAtualOpcoes = Serie.getSerieAtualPorData(data);
-    		Serie proximaSerieOpcoes = Serie.getProximaSeriePorData(data);
-    		Double selic = taxaSelic.getSelic(data);
-    		
-    		for (Acao acao : diaAcaoOpcoes.get(data).keySet()) {
-
-    			CotacaoBDI cotacaoAcao = null;
-    			List<CotacaoBDI> cotacoesOpcoesSerie1 = new ArrayList<CotacaoBDI>();
-    			List<CotacaoBDI> cotacoesOpcoesSerie2 = new ArrayList<CotacaoBDI>();
-    			
-    			for (CotacaoBDI cotacao : diaAcaoOpcoes.get(data).get(acao)) {
-    				if (CodigoBDI.LOTE_PADRAO.equals(cotacao.getCodigoBdi()) && TipoMercadoBDI.MERCADO_A_VISTA.equals(cotacao.getTipoMercado())) {
-    					if (cotacaoAcao != null)
-    						log.error("Sobrescreveu cotacao [{}] com [{}].", cotacaoAcao, cotacao);
-    					cotacaoAcao = cotacao;
-    				} else if (CodigoBDI.OPCOES_DE_COMPRA.equals(cotacao.getCodigoBdi()) && TipoMercadoBDI.OPCOES_DE_COMPRA.equals(cotacao.getTipoMercado())) {
-    					if (serieAtualOpcoes.isSerieDaOpcao(cotacao.getCodigoNegociacao())) {
-    						cotacoesOpcoesSerie1.add(cotacao);
-    					} else if (proximaSerieOpcoes.isSerieDaOpcao(cotacao.getCodigoNegociacao())) {
-    						cotacoesOpcoesSerie2.add(cotacao);
-    					}
-    				}
-    			}
-    			
-    			if (cotacaoAcao == null) {
-    				log.error("Nao foi encontrada cotacao de acao [{}] no dia [{}].", acao.getCodigo(), data);
-    				continue;
-    			}
-    			if (cotacoesOpcoesSerie1.size() == 0) {
-    				log.error("Nao foram encontradas cotacoes de opcoes de [{}] no dia [{}] para vencer neste mes.", acao.getCodigo(), data);
-    				continue;
-    			}
-    			if (cotacoesOpcoesSerie2.size() == 0) {
-    				log.error("Nao foram encontradas cotacoes de opcoes de [{}] no dia [{}] para vencer proximo mes.", acao.getCodigo(), data);
-    				continue;
-    			}
-    			
-    			CotacaoBDI opcaoTeorica1 = new CotacaoBDI(data, CodigoBDI.OPCOES_DE_COMPRA, TipoMercadoBDI.OPCOES_DE_COMPRA, "Teorica", 0, 0, 0, cotacaoAcao.getFechamento(), cotacoesOpcoesSerie1.iterator().next().getDataVencimento());
-    			CotacaoBDI opcaoTeorica2 = new CotacaoBDI(data, CodigoBDI.OPCOES_DE_COMPRA, TipoMercadoBDI.OPCOES_DE_COMPRA, "Teorica", 0, 0, 0, cotacaoAcao.getFechamento(), cotacoesOpcoesSerie2.iterator().next().getDataVencimento());
-    			persistencia.incluirCotacaoHistorica(data, acao, blackScholes
-						.calcularIndices(cotacaoAcao, serieAtualOpcoes,
-								cotacoesOpcoesSerie1, opcaoTeorica1,
-								proximaSerieOpcoes, cotacoesOpcoesSerie2,
-								opcaoTeorica2, configuracaoImportacao
-										.getQuantidadeOpcoesPorAcaoPorDia(), selic));
-    		}
-    	}
-    }
+	}
 }

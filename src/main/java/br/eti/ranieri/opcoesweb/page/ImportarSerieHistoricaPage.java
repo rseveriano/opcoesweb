@@ -1,10 +1,13 @@
 package br.eti.ranieri.opcoesweb.page;
 
+import java.net.URL;
+
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.apache.wicket.validation.validator.UrlValidator;
 import org.slf4j.LoggerFactory;
 
 import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
@@ -15,7 +18,7 @@ public class ImportarSerieHistoricaPage extends PaginaBase {
 	@SpringBean
 	private ImportadorOffline importador;
 	
-	private Model<String> localizacao = new Model<String>();
+	private Model<String> urlModel = new Model<String>();
 	
 	public ImportarSerieHistoricaPage() {
 		add(new FeedbackPanel("feedback"));
@@ -23,8 +26,8 @@ public class ImportarSerieHistoricaPage extends PaginaBase {
 			@Override
 			protected void onSubmit() {
 				try {
-					importador.importar(localizacao.getObject(), OpcoesWebHttpSession.get().getConfiguracaoImportacao());
-					info("Importação realizada com sucesso.");
+					importador.importar(new URL(urlModel.getObject()), OpcoesWebHttpSession.get().getConfiguracaoImportacao());
+					info("ImportaÃ§Ã£o realizada com sucesso.");
 				} catch (Exception e) {
 					LoggerFactory.getLogger(getClass()).error("Erro na importacao", e);
 					error(e.getMessage());
@@ -33,7 +36,7 @@ public class ImportarSerieHistoricaPage extends PaginaBase {
 		};
 		add(form);
 		
-		form.add(new TextField("localizacao", localizacao).setRequired(true));
+		form.add(new TextField("localizacao", urlModel).setRequired(true).add(new UrlValidator()));
 	}
 
 }

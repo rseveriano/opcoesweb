@@ -1,10 +1,7 @@
 package br.eti.ranieri.opcoesweb.page;
 
-import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.Locale;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
@@ -16,7 +13,6 @@ import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.joda.time.LocalDate;
 
@@ -27,8 +23,6 @@ import br.eti.ranieri.opcoesweb.estado.Variavel;
 import br.eti.ranieri.opcoesweb.jodatime.LocalDateField;
 
 public class CalcularBlackScholesAdhocPage extends PaginaBase {
-
-    private static final Locale ptBR = new Locale("pt", "BR");
 
     @SpringBean
     BlackScholes blackScholes;
