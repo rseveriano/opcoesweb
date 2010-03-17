@@ -1,20 +1,15 @@
 package br.eti.ranieri.opcoesweb.persistencia;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import br.eti.ranieri.opcoesweb.estado.Acao;
@@ -32,7 +27,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.common.base.Function;
@@ -59,8 +53,6 @@ import com.google.common.collect.Sets;
  * 
  */
 public class Persistencia {
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public List<Integer> getAnos() {
 
@@ -125,56 +117,29 @@ public class Persistencia {
 		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
 		Query query = new Query(Dia.KIND, yearKey) //
 				.addFilter(Dia.TIMESTAMP, FilterOperator.EQUAL, yyyyMMdd);
-		
-		for (Dia dia : Iterables.transform(service.prepare(query).asIterable(), new EntityToDiaFunction())) {
-			
-			CotacaoAcao cotacaoAcao = new CotacaoAcao(dia.getAcao(), dia.getPreco(), dia.getVariacao());
-			
+
+		for (Dia dia : Iterables.transform(service.prepare(query).asIterable(),
+				new EntityToDiaFunction())) {
+
 			Multimap<Serie, Opcao> opcaoPorSerieMap = ArrayListMultimap.create(2,
 					ConfiguracaoImportacao.QUANTIDADE_MAXIMA_OPCOES_POR_ACAO_POR_DIA + 1);
-			List<CotacaoOpcao> opcoesSerie1 = Lists.newArrayList();
-			List<CotacaoOpcao> opcoesSerie2 = Lists.newArrayList();
-			
+
 			Query optionQuery = new Query(Opcao.KIND, dia.getKey());
 			for (Entity optionEntity : service.prepare(optionQuery).asIterable()) {
 				Opcao opcao = new Opcao(optionEntity);
 				opcaoPorSerieMap.put(opcao.getSerie(), opcao);
 			}
-			
-			SortedSet<Serie> series = Sets.newTreeSet(new Comparator<Serie>() {
-				public int compare(Serie serie1, Serie serie2) {
-					int delta = serie1.ordinal() - serie2.ordinal();
-					return (Math.abs(delta) > 1) ? -delta : delta;
-				}
-			});
-			series.addAll(opcaoPorSerieMap.keySet());
-			Assert.isTrue(series.size() == 2, String.format( //
-					"Foram encontrados as series [%s] no dia %d", //
-					series.toString(), yyyyMMdd));
-			
-			Iterator<Serie> iterator = series.iterator();
-			Serie serie1 = iterator.next();
-			for (Opcao opcao : opcaoPorSerieMap.get(serie1)) {
-				opcoesSerie1.add(new CotacaoOpcao(serie1, opcao.getCodigo(), opcao.getVariaveis()));
-			}
-			Serie serie2 = iterator.next();
-			for (Opcao opcao : opcaoPorSerieMap.get(serie2)) {
-				opcoesSerie2.add(new CotacaoOpcao(serie2, opcao.getCodigo(), opcao.getVariaveis()));
-			}
 
-			retorno.put(dia.getAcao(), new CotacaoAcaoOpcoes(cotacaoAcao, opcoesSerie1, opcoesSerie2));
+			retorno.put(dia.getAcao(), toCotacaoAcaoOpcoes(dia, opcaoPorSerieMap, yyyyMMdd));
 		}
 
 		return retorno;
 	}
 
-	/**
-	 * TODO: refatore a partir daqui...
-	 */
 	public Map<Acao, CotacaoAcaoOpcoes> obterUltima() {
 		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery query = service.prepare(new Query(Dia.KIND).addSort(Dia.TIMESTAMP,
-				SortDirection.DESCENDING));
+		PreparedQuery query = service.prepare(new Query(Dia.KIND).setKeysOnly() //
+				.addSort(Dia.TIMESTAMP, SortDirection.DESCENDING));
 		List<Entity> entities = query.asList(FetchOptions.Builder.withLimit(1));
 		if (entities == null || entities.size() == 0) {
 			return Maps.newHashMap();
@@ -186,25 +151,39 @@ public class Persistencia {
 	public List<Entry<LocalDate, CotacaoAcaoOpcoes>> getCotacoes(Acao acao, LocalDate dataInicial,
 			LocalDate dataFinal) {
 
-		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
-		List<Entry<LocalDate, CotacaoAcaoOpcoes>> cotacoes = Lists.newArrayList();
-		while (dataInicial.isBefore(dataFinal) || dataInicial.equals(dataFinal)) {
+		List<Entry<LocalDate, CotacaoAcaoOpcoes>> retorno = Lists.newArrayList();
+		Integer yyyyMMddInicial = Dia.localDateToYYYYMMDD(dataInicial);
+		Integer yyyyMMddFinal = Dia.localDateToYYYYMMDD(dataFinal);
 
-			try {
-				Entity entity = service.get(new Dia(dataInicial, acao).toKey());
-				cotacoes.add( //
-						new SimpleEntry<LocalDate, CotacaoAcaoOpcoes>(dataInicial, //
-								new Dia(entity).toCotacaoAcaoOpcoes()));
-			} catch (EntityNotFoundException e) {
-				if (logger.isDebugEnabled())
-					logger.debug("Não encontrei cotacao para ação " + acao.getCodigo()
-							+ " na data " + dataInicial, e);
+		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
+
+		Query query = new Query(Dia.KIND) //
+				.addFilter(Dia.TIMESTAMP, FilterOperator.GREATER_THAN_OR_EQUAL, yyyyMMddInicial) //
+				.addFilter(Dia.TIMESTAMP, FilterOperator.LESS_THAN_OR_EQUAL, yyyyMMddFinal) //
+				.addSort(Dia.TIMESTAMP, SortDirection.ASCENDING);
+
+		for (Dia dia : Iterables.transform(service.prepare(query).asIterable(),
+				new EntityToDiaFunction())) {
+
+			if (acao.equals(dia.getAcao()) == false) {
+				continue;
 			}
 
-			dataInicial = dataInicial.plusDays(1);
+			Integer yyyyMMdd = Dia.localDateToYYYYMMDD(dia.getDia());
+			Multimap<Serie, Opcao> opcaoPorSerieMap = ArrayListMultimap.create(2,
+					ConfiguracaoImportacao.QUANTIDADE_MAXIMA_OPCOES_POR_ACAO_POR_DIA + 1);
+
+			Query optionQuery = new Query(Opcao.KIND, dia.getKey());
+			for (Entity optionEntity : service.prepare(optionQuery).asIterable()) {
+				Opcao opcao = new Opcao(optionEntity);
+				opcaoPorSerieMap.put(opcao.getSerie(), opcao);
+			}
+
+			retorno.add(new SimpleEntry<LocalDate, CotacaoAcaoOpcoes>(dia.getDia(),
+					toCotacaoAcaoOpcoes(dia, opcaoPorSerieMap, yyyyMMdd)));
 		}
 
-		return cotacoes;
+		return retorno;
 	}
 
 	public void incluirCotacaoHistorica(LocalDate data, Acao acao, CotacaoAcaoOpcoes cotacoes) {
@@ -214,121 +193,102 @@ public class Persistencia {
 		Assert.notNull(cotacoes);
 
 		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
-		
-		boolean persistAno = false;
-		boolean persistMes = false;
 
-		Transaction anoTransaction = service.beginTransaction();
+		// Salva o ano com o mes dentro, se não existir ainda
 		Ano ano;
 		try {
-			Entity anoEntity = service.get(anoTransaction, new Ano(data.getYear()).toKey());
-			System.out.println("Encontrei um ano com key = " + anoEntity.getKey().getId());
-			ano = new Ano(anoEntity);
+			ano = new Ano(service.get(new Ano(data.getYear()).toKey()));
+			if (ano.getMeses() == null || ano.getMeses().contains(data.getMonthOfYear()) == false) {
+				ano.addMes(data.getMonthOfYear());
+				service.put(ano.toEntity());
+			}
 		} catch (EntityNotFoundException e) {
-			System.out.println("Nao encontrei um ano, construirei com o numero " + data.getYear());
 			ano = new Ano(data.getYear());
-			persistAno = true;
+			ano.addMes(data.getMonthOfYear());
+			service.put(ano.toEntity());
 		}
 
-		Transaction mesTransaction = service.beginTransaction();
-		Mes mes;
-		try {
-			Entity mesEntity = service.get(mesTransaction, new Mes(data.getYear(), data.getMonthOfYear())
-					.toKey());
-			System.out.println("Encontrei um mes com key = " + mesEntity.getKey().getId());
-			mes = new Mes(mesEntity);
-		} catch (EntityNotFoundException e) {
-			mes = new Mes(data.getYear(), data.getMonthOfYear());
-			persistMes = true;
-		}
-
-		Transaction diaTransaction = service.beginTransaction();
+		// Salva o dia sobrescrevendo preço e variação, sobrescreve se existir
 		Dia dia;
 		try {
-			dia = new Dia(service.get(diaTransaction, new Dia(data, acao).toKey()));
+			Key diaKey = new Dia(data, acao).toKey(ano.getKey());
+			Entity diaEntity = service.get(diaKey);
+			dia = new Dia(diaEntity);
 		} catch (EntityNotFoundException e) {
 			dia = new Dia(data, acao);
 		}
 
-		// pendura o mes no ano
-		if (ano.getMeses() != null) {
-			if (new TreeSet<Mes>(ano.getMeses()).contains(mes) == false) {
-				ano.getMeses().add(mes);
-				persistAno = true;
-			}
-		} else {
-			ano.addMes(mes);
-			persistAno = true;
-		}
-
-		// pendura o dia no mes
-		if (mes.getDias() != null) {
-			if (new TreeSet<Dia>(mes.getDias()).contains(dia) == false) {
-				mes.getDias().add(dia);
-				persistMes = true;
-			}
-		} else {
-			mes.addDia(dia);
-			persistMes = true;
-		}
-
-		// atualiza o Dia pois será persistido incondicionalmente
 		dia.setPreco(cotacoes.getCotacaoAcao().getPrecoAcao());
 		dia.setVariacao(cotacoes.getCotacaoAcao().getVariacaoAcao());
-		// apaga as opcoes antigas antes de escrever as novas
-		if (dia.getOpcoesSerie1() != null) {
-			service.delete(Collections2.transform(dia.getOpcoesSerie1(),
-					new OpcaoToKeyFunction()));
-		}
-		if (dia.getOpcoesSerie2() != null) {
-			service.delete(Collections2.transform(dia.getOpcoesSerie2(),
-					new OpcaoToKeyFunction()));
-		}
-		// inclui novas opcoes
-		for (CotacaoOpcao cotacao : cotacoes.getOpcoesSerie1()) {
-			dia.addOpcaoSerie1(new Opcao(cotacao));
-		}
-		for (CotacaoOpcao cotacao : cotacoes.getOpcoesSerie2()) {
-			dia.addOpcaoSerie2(new Opcao(cotacao));
-		}
-
-		// Salva quem for necessario
-		if (persistAno) {
-			service.put(ano.toEntity());
-		}
-		if (persistMes) {
-			service.put(mes.toEntity());
-		}
-		Collection<Entity> entitiesOpcoesSerie1 = Collections2.transform(dia.getOpcoesSerie1(),
-				new OpcaoToEntityFunction());
-		Collection<Entity> entitiesOpcoesSerie2 = Collections2.transform(dia.getOpcoesSerie2(),
-				new OpcaoToEntityFunction());
-		service.put(entitiesOpcoesSerie1);
-		service.put(entitiesOpcoesSerie2);
-		service.put(dia.toEntity(entitiesOpcoesSerie1, entitiesOpcoesSerie2));
+		service.put(dia.toEntity(ano.getKey()));
+		
+		// Remove as opções antigas
+		Query optionToDeleteQuery = new Query(Opcao.KIND, dia.getKey()).setKeysOnly();
+		service.delete(Iterables.transform(service.prepare(optionToDeleteQuery).asIterable(), new EntityToKeyFunction()));
+		
+		// Salva as novas opções
+		service.put(Collections2.transform(cotacoes.getOpcoesSerie1(), new CotacaoOpcaoToEntityFunction(dia.getKey())));
+		service.put(Collections2.transform(cotacoes.getOpcoesSerie2(), new CotacaoOpcaoToEntityFunction(dia.getKey())));
 	}
 
-	private static class OpcaoToEntityFunction implements Function<Opcao, Entity> {
-		public Entity apply(Opcao opcao) {
-			return opcao.toEntity();
+	private CotacaoAcaoOpcoes toCotacaoAcaoOpcoes(Dia dia, Multimap<Serie, Opcao> opcaoPorSerieMap,
+			Integer yyyyMMdd) {
+		SortedSet<Serie> series = Sets.newTreeSet(new Comparator<Serie>() {
+			public int compare(Serie serie1, Serie serie2) {
+				int delta = serie1.ordinal() - serie2.ordinal();
+				return (Math.abs(delta) > 1) ? -delta : delta;
+			}
+		});
+		series.addAll(opcaoPorSerieMap.keySet());
+		Assert.isTrue(series.size() == 2, String.format( //
+				"Foram encontrados as series [%s] no dia %d", //
+				series.toString(), yyyyMMdd));
+
+		List<CotacaoOpcao> opcoesSerie1 = Lists.newArrayList();
+		List<CotacaoOpcao> opcoesSerie2 = Lists.newArrayList();
+
+		Iterator<Serie> iterator = series.iterator();
+		Serie serie1 = iterator.next();
+		for (Opcao opcao : opcaoPorSerieMap.get(serie1)) {
+			opcoesSerie1.add(new CotacaoOpcao(serie1, opcao.getCodigo(), opcao.getVariaveis()));
+		}
+		Serie serie2 = iterator.next();
+		for (Opcao opcao : opcaoPorSerieMap.get(serie2)) {
+			opcoesSerie2.add(new CotacaoOpcao(serie2, opcao.getCodigo(), opcao.getVariaveis()));
+		}
+
+		CotacaoAcao cotacaoAcao = new CotacaoAcao(dia.getAcao(), dia.getPreco(), dia.getVariacao());
+
+		return new CotacaoAcaoOpcoes(cotacaoAcao, opcoesSerie1, opcoesSerie2);
+	}
+
+	private static class CotacaoOpcaoToEntityFunction implements Function<CotacaoOpcao, Entity> {
+		private final Key dayKey;
+
+		private CotacaoOpcaoToEntityFunction(Key dayKey) {
+			this.dayKey = dayKey;
+		}
+
+		public Entity apply(CotacaoOpcao cotacao) {
+			return new Opcao(cotacao).toEntity(dayKey);
 		}
 	}
 
-	private static class OpcaoToKeyFunction implements Function<Opcao, Key> {
-		public Key apply(Opcao opcao) {
-			return opcao.getKey();
-		}
-	}
-	
 	private static class KeyToDayOfMonthFunction implements Function<Entity, Integer> {
 		public Integer apply(Entity entity) {
 			return new Dia(entity.getKey()).getDia().getDayOfMonth();
 		}
 	}
-	
+
 	private static class EntityToDiaFunction implements Function<Entity, Dia> {
 		public Dia apply(Entity entity) {
 			return new Dia(entity);
+		}
+	}
+	
+	private static class EntityToKeyFunction implements Function<Entity, Key> {
+		public Key apply(Entity entity) {
+			return entity.getKey();
 		}
 	}
 }

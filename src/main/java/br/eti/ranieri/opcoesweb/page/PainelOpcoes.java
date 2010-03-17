@@ -86,7 +86,7 @@ public class PainelOpcoes extends Panel {
 						.getDataVencimento(atualizacao))));
 
 		if (atualizacao == null) {
-			add(new Label("atualizacao", "AtualizaÁ„o n„o conhecida"));
+			add(new Label("atualizacao", "Atualiza√ß√£o n√£o conhecida"));
 		} else {
 			add(new Label("atualizacao", atualizacaoFormatada));
 		}

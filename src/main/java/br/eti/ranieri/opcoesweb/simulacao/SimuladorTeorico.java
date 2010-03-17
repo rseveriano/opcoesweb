@@ -1,16 +1,8 @@
 package br.eti.ranieri.opcoesweb.simulacao;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import org.joda.time.LocalDate;
@@ -24,9 +16,6 @@ import br.eti.ranieri.opcoesweb.estado.CotacaoOpcao;
 import br.eti.ranieri.opcoesweb.estado.Serie;
 import br.eti.ranieri.opcoesweb.estado.Variavel;
 import br.eti.ranieri.opcoesweb.persistencia.Persistencia;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 
 @Service
 public class SimuladorTeorico {

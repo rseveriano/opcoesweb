@@ -22,7 +22,7 @@ public class Opcao {
 	private Map<Variavel, Number> variaveis;
 
 	public Opcao(Entity entity) {
-		this.serie = Serie.values()[(Integer) entity.getProperty(SERIE)];
+		this.serie = Serie.values()[((Long) entity.getProperty(SERIE)).intValue()];
 		this.codigo = (String) entity.getProperty(CODIGO);
 
 		this.variaveis = Maps.newHashMap();

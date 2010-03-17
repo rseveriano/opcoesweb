@@ -67,13 +67,13 @@ public enum Serie {
 		LocalDate terceiraSegundaFeira = getTerceiraSegundaFeiraDesteMes(hojeFicticio);
 		Serie serieAtual = getSerieAtualPorData(hojeFicticio, terceiraSegundaFeira);
 		if (this.ordinal() == serieAtual.ordinal()) {
-			// se for a mesma Serie, o vencimento é a proxima 3a segunda
+			// se for a mesma Serie, o vencimento Ã© a proxima 3a segunda
 			if (hojeFicticio.isBefore(terceiraSegundaFeira) || hojeFicticio.equals(terceiraSegundaFeira))
 				return terceiraSegundaFeira;
 			// a 3a segunda deste mes ja passou, vamos para a do proximo mes
 			return getTerceiraSegundaFeiraDesteMes(hojeFicticio.plusMonths(1));
 		} else if (this.ordinal() == (serieAtual.ordinal() + 1) % 12) {
-			// se for a próxima Serie, o vencimento é
+			// se for a prÃ³xima Serie, o vencimento Ã©
 			// a 3a segunda-feira do mes que vem, caso a
 			// 3a segunda-feira deste mes ainda nao tenha
 			// passado. Caso ja tenha passado, sera a 3a
@@ -87,7 +87,7 @@ public enum Serie {
 	}
 
 	public String getDescricao() {
-		return "Série " + name();
+		return "SÃ©rie " + name();
 	}
 
 	private final Pattern seriePattern = Pattern.compile("\\w{4}([A-L])\\d+");

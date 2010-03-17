@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,13 +89,13 @@ public class Dia implements Comparable<Dia> {
 		Assert.notNull(acao, "Ação não pode ser nula");
 
 		return KeyFactory.createKey(parent, KIND, //
-				DATE_FORMAT.format(dia.toDateTimeAtCurrentTime().toDate()) //
-						+ "," //
+				DATE_FORMAT.format(dia.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate())
+						+ ","
 						+ acao.ordinal());
 	}
 
 	public Entity toEntity(Key parent) {
-		Key key = toKey(parent);
+		this.key = toKey(parent);
 		Entity entity = new Entity(key);
 
 		Assert.notNull(acao, "Ação não pode ser nula");
@@ -121,12 +123,10 @@ public class Dia implements Comparable<Dia> {
 
 	public static LocalDate extractDiaFromKey(Key key) {
 		Assert.notNull(key, "Chave não pode ser nula");
-		System.out.println("Dia.key = " + key.getName());
 		StringTokenizer tokenizer = new StringTokenizer(key.getName(), ",");
 		try {
 			Date date = DATE_FORMAT.parse(tokenizer.nextToken());
-			System.out.println(" ... que converteu no seguinte Date = " + date);
-			return new LocalDate(date.getTime());
+			return new DateTime(date.getTime(), DateTimeZone.UTC).toLocalDate();
 		} catch (ParseException e) {
 			logger.error("Erro na extracao de data na chave [" + key.getName() + "]", e);
 			throw new RuntimeException(e);

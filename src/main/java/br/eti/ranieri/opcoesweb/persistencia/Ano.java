@@ -14,23 +14,29 @@ public class Ano {
 	public static final String KIND = Ano.class.getName();
 	public static final String MES_PREFIX = "MES_";
 
+	private Key key;
 	private Integer ano;
 	private Set<Integer> meses;
 
 	public Ano(Entity entity) {
-		this.ano = extractYearFromKey(entity.getKey());
+		this.key = entity.getKey();
+		this.ano = new Long(key.getId()).intValue();
 
 		this.meses = Sets.newHashSet();
 		for (int i = 1; i <= 12; i++) {
 			Object property = entity.getProperty(String.format("%s%02d", MES_PREFIX, i));
 			if (property != null) {
-				meses.add((Integer) property);
+				meses.add(((Long) property).intValue());
 			}
 		}
 	}
 
 	public Ano(Integer ano) {
 		this.ano = ano;
+	}
+
+	public Key getKey() {
+		return key;
 	}
 
 	public Integer getAno() {
@@ -55,7 +61,7 @@ public class Ano {
 	}
 
 	public Entity toEntity() {
-		Key key = toKey();
+		this.key = toKey();
 		Entity entity = new Entity(key);
 
 		for (Integer mes : meses) {
@@ -63,11 +69,6 @@ public class Ano {
 		}
 
 		return entity;
-	}
-
-	public Integer extractYearFromKey(Key key) {
-		Assert.notNull(key, "Chave não pode ser nula");
-		return new Long(key.getId()).intValue();
 	}
 
 }
