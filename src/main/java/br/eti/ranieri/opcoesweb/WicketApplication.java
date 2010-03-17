@@ -1,5 +1,6 @@
 package br.eti.ranieri.opcoesweb;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
@@ -17,6 +18,8 @@ import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import br.eti.ranieri.opcoesweb.page.HomePage;
 import br.eti.ranieri.opcoesweb.page.LoginPage;
 import br.eti.ranieri.opcoesweb.page.PaginaBase;
+
+import com.google.appengine.api.utils.SystemProperty;
 
 /**
  * Application object for your web application. If you want to run this
@@ -60,6 +63,15 @@ public class WicketApplication extends WebApplication {
 						throw new RestartResponseAtInterceptPageException(LoginPage.class);
 					}
 				});
+	}
+
+	@Override
+	public String getConfigurationType() {
+		// App Engine set the system property which identify the runtime environment
+		if (SystemProperty.Environment.Value.Production.equals(SystemProperty.environment.value())) {
+			return Application.DEPLOYMENT;
+		}
+		return super.getConfigurationType();
 	}
 
 	@Override

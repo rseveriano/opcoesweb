@@ -23,16 +23,9 @@ import org.apache.wicket.IClusterable;
  * @author ranieri
  */
 public class ConfiguracaoOnline implements IClusterable {
-	private boolean usarProxy;
-    private String proxyURL;
     private String jsessionid;
 
     public boolean isConfigurado() {
-        if (usarProxy) {
-            if (proxyURL == null || proxyURL.length() == 0) {
-                return false;
-            }
-        }
         return jsessionid != null && jsessionid.length() > 0;
     }
 
@@ -42,21 +35,5 @@ public class ConfiguracaoOnline implements IClusterable {
 
     public void setJsessionid(String jsessionid) {
         this.jsessionid = jsessionid;
-    }
-
-    public String getProxyURL() {
-        return proxyURL;
-    }
-
-    public void setProxyURL(String proxyURL) {
-        this.proxyURL = proxyURL;
-    }
-
-    public boolean isUsarProxy() {
-        return usarProxy;
-    }
-
-    public void setUsarProxy(boolean usarProxy) {
-        this.usarProxy = usarProxy;
     }
 }

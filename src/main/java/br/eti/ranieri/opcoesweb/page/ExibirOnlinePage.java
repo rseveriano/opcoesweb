@@ -53,7 +53,7 @@ public class ExibirOnlinePage extends PaginaBase {
 		boolean configurado = OpcoesWebHttpSession.get().getConfiguracaoOnline()
 				.isConfigurado();
 		if (configurado == false) {
-			info("Para exibir cotações online, é necessária configuração.");
+			info("Para exibir cotaÃ§Ãµes online, Ã© necessÃ¡ria a configuraÃ§Ã£o.");
 			setResponsePage(ConfigurarOnlinePage.class);
 		} else {
 			Map<Acao, CotacaoAcaoOpcoes> cotacoesOnline = OpcoesWebHttpSession.get()

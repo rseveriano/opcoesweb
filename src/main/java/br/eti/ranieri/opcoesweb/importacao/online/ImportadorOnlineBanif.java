@@ -16,7 +16,7 @@
  */
 package br.eti.ranieri.opcoesweb.importacao.online;
 
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,25 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.SocketFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.BasicHttpRequest;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +44,12 @@ import br.eti.ranieri.opcoesweb.importacao.offline.CotacaoBDI;
 import br.eti.ranieri.opcoesweb.importacao.offline.TipoMercadoBDI;
 import br.eti.ranieri.opcoesweb.persistencia.Persistencia;
 
+import com.google.appengine.api.urlfetch.HTTPHeader;
+import com.google.appengine.api.urlfetch.HTTPMethod;
+import com.google.appengine.api.urlfetch.HTTPRequest;
+import com.google.appengine.api.urlfetch.HTTPResponse;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -74,6 +61,8 @@ import com.google.common.collect.Lists;
  */
 @Service("importadorOnline")
 public class ImportadorOnlineBanif implements ImportadorOnline {
+
+	private static final String BANIF_URL = "https://www.banifinvest.com.br/tr/bi/cotacoes/cotacoes_ajax_resultado.jsp?busca=";
 
 	private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -164,7 +153,9 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 			Serie serie, LocalDate agora) throws Exception {
 		// Obtem a ultima cotacao historica para
 		// saber quais opções tinham maior volume
-		CotacaoAcaoOpcoes acaoOpcoes = persistencia.obterUltima().get(acao);
+		Map<Acao, CotacaoAcaoOpcoes> obterUltima = persistencia.obterUltima();
+		System.err.println("persistencia.obterUltima() = " + obterUltima);
+		CotacaoAcaoOpcoes acaoOpcoes = obterUltima.get(acao);
 		// Decide se o parametro Serie se refere a
 		// getOpcoesSerie1() ou getOpcoesSerie2()
 		Collection<CotacaoOpcao> opcoes;
@@ -201,75 +192,33 @@ public class ImportadorOnlineBanif implements ImportadorOnline {
 	}
 
 	/**
-	 * Entry-point para ser chamado por {@link #importar(ConfiguracaoOnline)}.
+	 * Baixa as cotações de ações ou opções cujos códigos são separados por ponto-e-vírgula.
+	 * 
+	 * @return o XML de resposta do Banif ou null, se a resposta não for HTTP 200 OK.
 	 */
 	String baixarCotacoes(ConfiguracaoOnline configuracao, String codigos)
 			throws Exception {
 
-		DefaultHttpClient httpClient = criarHttpClient(configuracao);
-
-		ResponseHandler<String> responseHandler = new BasicResponseHandler();
-		HttpHost destino = new HttpHost("www.banifinvest.com.br", 443, "https");
-		// Baixa o XML com as cotações das ações
-		HttpRequest request = new BasicHttpRequest("GET",
-				"/tr/bi/cotacoes/cotacoes_ajax_resultado.jsp?busca=" + codigos,
-				HttpVersion.HTTP_1_1);
-		String xml = httpClient.execute(destino, request, responseHandler);
-		return xml;
-	}
-
-	DefaultHttpClient criarHttpClient(ConfiguracaoOnline configuracao) {
-
-		DefaultHttpClient httpClient;
-
-		if (configuracao.getProxyURL() != null) {
-			HttpParams httpParams = criarHttpParams();
-			ClientConnectionManager connectionManager = new ThreadSafeClientConnManager(
-					httpParams, criarSchemeRegistry());
-			httpClient = new DefaultHttpClient(connectionManager, httpParams);
-
-			try {
-				URL url = new URL(configuracao.getProxyURL());
-				httpClient.getParams().setParameter(
-						ConnRoutePNames.DEFAULT_PROXY,
-						new HttpHost(url.getHost(), url.getPort(), "http"));
-			} catch (MalformedURLException e) {
-				logger.error("URL malformada [{}]", configuracao.getProxyURL(),
-						e);
-			}
-		} else {
-			httpClient = new DefaultHttpClient();
+		URLFetchService service = URLFetchServiceFactory.getURLFetchService();
+		
+		HTTPRequest request = new HTTPRequest(new URL(BANIF_URL + codigos), HTTPMethod.GET);
+		request.addHeader(new HTTPHeader("Cookie", "jsessionid=" + configuracao.getJsessionid()));
+		
+		HTTPResponse response = service.fetch(request);
+		if (response.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			return null;
 		}
-
-		BasicClientCookie cookie = new BasicClientCookie("jsessionid",
-				configuracao.getJsessionid());
-		cookie.setDomain("www.banifinvest.com.br");
-		cookie.setPath("/");
-		httpClient.getCookieStore().addCookie(cookie);
-
-		return httpClient;
+		
+		String encoding = "ISO-8859-1";
+		for (HTTPHeader header : response.getHeaders()) {
+			if ("Content-Type".equalsIgnoreCase(header.getName())) {
+				if (header.getValue() != null && header.getValue().toLowerCase().contains("CHARSET=UTF-8")) {
+					encoding = "UTF-8";
+				}
+			}
+		}
+		
+		return new String(response.getContent(), encoding);
 	}
 
-	SchemeRegistry criarSchemeRegistry() {
-
-		SchemeRegistry supportedSchemes = new SchemeRegistry();
-
-		// Register the "http" and "https" protocol schemes, they are
-		// required by the default operator to look up socket factories.
-		SocketFactory sf = PlainSocketFactory.getSocketFactory();
-		supportedSchemes.register(new Scheme("http", sf, 80));
-		sf = SSLSocketFactory.getSocketFactory();
-		supportedSchemes.register(new Scheme("https", sf, 80));
-
-		return supportedSchemes;
-	}
-
-	HttpParams criarHttpParams() {
-		// prepare parameters
-		HttpParams params = new BasicHttpParams();
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setContentCharset(params, "UTF-8");
-		HttpProtocolParams.setUseExpectContinue(params, true);
-		return params;
-	}
 }

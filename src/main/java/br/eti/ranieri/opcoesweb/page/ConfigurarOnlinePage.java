@@ -17,54 +17,35 @@
 package br.eti.ranieri.opcoesweb.page;
 
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.validation.INullAcceptingValidator;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.ValidationError;
-import org.apache.wicket.validation.validator.UrlValidator;
 
 import br.eti.ranieri.opcoesweb.OpcoesWebHttpSession;
 import br.eti.ranieri.opcoesweb.estado.ConfiguracaoOnline;
 
 /**
- *
+ * 
  * @author ranieri
  */
 public class ConfigurarOnlinePage extends PaginaBase {
 
-    public ConfigurarOnlinePage() {
-        add(new FeedbackPanel("feedback"));
-        
-        final ConfiguracaoOnline configuracao = OpcoesWebHttpSession.get().getConfiguracaoOnline();
-        Form formulario = new Form("formulario", new CompoundPropertyModel(configuracao)) {
+	public ConfigurarOnlinePage() {
+		add(new FeedbackPanel("feedback"));
 
-            @Override
-            protected void onSubmit() {
-                setResponsePage(ExibirOnlinePage.class);
-            }
-        };
-        add(formulario);
+		final ConfiguracaoOnline configuracao = OpcoesWebHttpSession.get().getConfiguracaoOnline();
+		Form<ConfiguracaoOnline> formulario = new Form<ConfiguracaoOnline>("formulario",
+				new CompoundPropertyModel<ConfiguracaoOnline>(configuracao)) {
 
-        formulario.add(new CheckBox("usarProxy"));
+			@Override
+			protected void onSubmit() {
+				setResponsePage(ExibirOnlinePage.class);
+			}
+		};
+		add(formulario);
 
-        final TextField proxyURL = new TextField("proxyURL");
-        proxyURL.add(new INullAcceptingValidator() {
-            public void validate(IValidatable validatable) {
-                if (configuracao.isUsarProxy() && validatable.getValue() == null) {
-                    ValidationError error = new ValidationError();
-                    error.setMessage("Se quiser utilizar proxy, deve definir sua URL, no formato [http://proxy.dominio.com:3128]");
-                    validatable.error(error);
-                }
-            }
-        });
-        proxyURL.add(new UrlValidator(new String[]{"http"}, UrlValidator.NO_FRAGMENTS));
-        formulario.add(proxyURL);
-        formulario.add(new RequiredTextField("jsessionid"));
-        formulario.add(new Button("submeter"));
-    }
+		formulario.add(new RequiredTextField<String>("jsessionid"));
+		formulario.add(new Button("submeter"));
+	}
 }

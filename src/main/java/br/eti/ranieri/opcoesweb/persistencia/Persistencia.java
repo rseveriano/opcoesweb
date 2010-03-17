@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
@@ -137,14 +138,17 @@ public class Persistencia {
 	}
 
 	public Map<Acao, CotacaoAcaoOpcoes> obterUltima() {
+		Ano ultimoAno = new Ano(new TreeSet<Integer>(getAnos()).last());
 		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery query = service.prepare(new Query(Dia.KIND).setKeysOnly() //
-				.addSort(Dia.TIMESTAMP, SortDirection.DESCENDING));
+		PreparedQuery query = service.prepare(new Query(Dia.KIND, ultimoAno.toKey()) //
+				.setKeysOnly().addSort(Dia.TIMESTAMP, SortDirection.DESCENDING));
 		List<Entity> entities = query.asList(FetchOptions.Builder.withLimit(1));
 		if (entities == null || entities.size() == 0) {
+			System.err.println("Nao havia nenhum registro na ordem decrescente");
 			return Maps.newHashMap();
 		}
 		LocalDate date = new Dia(entities.get(0).getKey()).getDia();
+		System.err.println("Vamos obter a ultima cotacao pela data " + date);
 		return obterPorData(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
 	}
 
@@ -221,14 +225,17 @@ public class Persistencia {
 		dia.setPreco(cotacoes.getCotacaoAcao().getPrecoAcao());
 		dia.setVariacao(cotacoes.getCotacaoAcao().getVariacaoAcao());
 		service.put(dia.toEntity(ano.getKey()));
-		
+
 		// Remove as opções antigas
 		Query optionToDeleteQuery = new Query(Opcao.KIND, dia.getKey()).setKeysOnly();
-		service.delete(Iterables.transform(service.prepare(optionToDeleteQuery).asIterable(), new EntityToKeyFunction()));
-		
+		service.delete(Iterables.transform(service.prepare(optionToDeleteQuery).asIterable(),
+				new EntityToKeyFunction()));
+
 		// Salva as novas opções
-		service.put(Collections2.transform(cotacoes.getOpcoesSerie1(), new CotacaoOpcaoToEntityFunction(dia.getKey())));
-		service.put(Collections2.transform(cotacoes.getOpcoesSerie2(), new CotacaoOpcaoToEntityFunction(dia.getKey())));
+		service.put(Collections2.transform(cotacoes.getOpcoesSerie1(),
+				new CotacaoOpcaoToEntityFunction(dia.getKey())));
+		service.put(Collections2.transform(cotacoes.getOpcoesSerie2(),
+				new CotacaoOpcaoToEntityFunction(dia.getKey())));
 	}
 
 	private CotacaoAcaoOpcoes toCotacaoAcaoOpcoes(Dia dia, Multimap<Serie, Opcao> opcaoPorSerieMap,
@@ -285,7 +292,7 @@ public class Persistencia {
 			return new Dia(entity);
 		}
 	}
-	
+
 	private static class EntityToKeyFunction implements Function<Entity, Key> {
 		public Key apply(Entity entity) {
 			return entity.getKey();

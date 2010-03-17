@@ -1,7 +1,6 @@
 package br.eti.ranieri.opcoesweb.importacao.online;
 
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.digester.Digester;
@@ -10,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import br.eti.ranieri.opcoesweb.importacao.offline.CotacaoBDI;
+
+import com.google.common.collect.Lists;
 
 @Service
 public class XmlBanifParser {
@@ -45,7 +46,10 @@ public class XmlBanifParser {
 
 	public List<CotacaoBDI> parse(String xml) {
 
-		List<CotacaoBDI> cotacoes = new ArrayList<CotacaoBDI>();
+		List<CotacaoBDI> cotacoes = Lists.newArrayList();
+		if (xml == null || "".equals(xml))
+			return cotacoes;
+
 		try {
 			BanifXmlResultados resultados = (BanifXmlResultados) digester
 					.parse(new StringReader(xml));
