@@ -15,7 +15,6 @@ public class OpcoesWebHttpSession extends WebSession {
 	private final ConfiguracaoOnline configuracaoOnline = new ConfiguracaoOnline();
 	private final ConfiguracaoImportacao configuracaoImportacao = new ConfiguracaoImportacao();
 	private Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline;
-	private boolean autenticado;
 
 	public OpcoesWebHttpSession(Request request) {
 		super(request);
@@ -39,13 +38,5 @@ public class OpcoesWebHttpSession extends WebSession {
 
 	public void setCacheCotacoesOnline(Map<Acao, CotacaoAcaoOpcoes> cacheCotacoesOnline) {
 		this.cacheCotacoesOnline = cacheCotacoesOnline;
-	}
-
-	public boolean isAutenticado() {
-		return autenticado;
-	}
-
-	public void setAutenticado(boolean autenticado) {
-		this.autenticado = autenticado;
 	}
 }

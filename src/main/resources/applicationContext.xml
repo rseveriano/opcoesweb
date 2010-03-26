@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
 
 
 	<bean id="wicketApplication" class="br.eti.ranieri.opcoesweb.WicketApplication">
@@ -38,4 +42,22 @@
 		class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor" />
 	-->
 
+	<security:http access-denied-page="/403.jsp">
+
+		<security:intercept-url pattern="/login.jsp*" access="ROLE_ANONYMOUS" requires-channel="https"/>
+		<security:intercept-url pattern="/*.jsp" access="ROLE_ANONYMOUS" requires-channel="https"/>
+		<security:intercept-url pattern="/w/configurarOnline" access="IS_AUTHENTICATED_FULLY" requires-channel="https"/>
+		<security:intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" requires-channel="http"/>
+
+		<security:anonymous/>
+		<security:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?error=1" default-target-url="/w/home"/>
+		<security:concurrent-session-control/>
+		<security:logout/>
+	</security:http>
+	
+	<security:authentication-provider>
+		<security:user-service>
+			<security:user name="ranieri.severiano" password="k6cP4vy" authorities="ROLE_USER"/>
+		</security:user-service>
+	</security:authentication-provider>
 </beans>

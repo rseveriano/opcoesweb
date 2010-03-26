@@ -54,6 +54,7 @@ public class ExibirOnlinePage extends PaginaBase {
 				.isConfigurado();
 		if (configurado == false) {
 			info("Para exibir cotações online, é necessária a configuração.");
+			getRequestCycle().setRedirect(true);
 			setResponsePage(ConfigurarOnlinePage.class);
 		} else {
 			Map<Acao, CotacaoAcaoOpcoes> cotacoesOnline = OpcoesWebHttpSession.get()

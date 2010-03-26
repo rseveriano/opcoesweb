@@ -19,19 +19,21 @@ package br.eti.ranieri.opcoesweb.page;
 
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 
 /**
- *
+ * 
  * @author ranieri
  */
 public abstract class PaginaBase extends WebPage {
-    public PaginaBase() {
-        add(new BookmarkablePageLink("configurar", ConfigurarOnlinePage.class));
-        add(new BookmarkablePageLink("exibirOnline", ExibirOnlinePage.class));
-        add(new BookmarkablePageLink("importadorSerieHistorica", ImportarSerieHistoricaPage.class));
-        add(new BookmarkablePageLink("exibirOffline", ExibirOfflinePage.class));
-        add(new BookmarkablePageLink("calcularBlackScholesAdhoc", CalcularBlackScholesAdhocPage.class));
-        add(new BookmarkablePageLink("wizardSimulacao", Wizard1SimulacaoPage.class));
-        add(new BookmarkablePageLink("logoutLink", LogoutPage.class));
-    }
+	public PaginaBase() {
+		add(new BookmarkablePageLink("configurar", ConfigurarOnlinePage.class));
+		add(new BookmarkablePageLink("exibirOnline", ExibirOnlinePage.class));
+		add(new BookmarkablePageLink("importadorSerieHistorica", ImportarSerieHistoricaPage.class));
+		add(new BookmarkablePageLink("exibirOffline", ExibirOfflinePage.class));
+		add(new BookmarkablePageLink("calcularBlackScholesAdhoc",
+				CalcularBlackScholesAdhocPage.class));
+		add(new BookmarkablePageLink("wizardSimulacao", Wizard1SimulacaoPage.class));
+		add(new ExternalLink("logoutLink", "/j_spring_security_logout").setContextRelative(true));
+	}
 }

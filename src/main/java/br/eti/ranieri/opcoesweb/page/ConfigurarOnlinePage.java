@@ -34,7 +34,7 @@ public class ConfigurarOnlinePage extends PaginaBase {
 	public ConfigurarOnlinePage() {
 		add(new FeedbackPanel("feedback"));
 
-		final ConfiguracaoOnline configuracao = OpcoesWebHttpSession.get().getConfiguracaoOnline();
+		ConfiguracaoOnline configuracao = OpcoesWebHttpSession.get().getConfiguracaoOnline();
 		Form<ConfiguracaoOnline> formulario = new Form<ConfiguracaoOnline>("formulario",
 				new CompoundPropertyModel<ConfiguracaoOnline>(configuracao)) {
 

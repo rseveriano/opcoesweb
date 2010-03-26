@@ -1,23 +1,16 @@
 package br.eti.ranieri.opcoesweb;
 
 import org.apache.wicket.Application;
-import org.apache.wicket.Component;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
-import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.Session;
-import org.apache.wicket.authorization.Action;
-import org.apache.wicket.authorization.IAuthorizationStrategy;
-import org.apache.wicket.authorization.IUnauthorizedComponentInstantiationListener;
 import org.apache.wicket.protocol.http.HttpSessionStore;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.session.ISessionStore;
-import org.apache.wicket.settings.ISecuritySettings;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
+import br.eti.ranieri.opcoesweb.page.ConfigurarOnlinePage;
 import br.eti.ranieri.opcoesweb.page.HomePage;
-import br.eti.ranieri.opcoesweb.page.LoginPage;
-import br.eti.ranieri.opcoesweb.page.PaginaBase;
 
 import com.google.appengine.api.utils.SystemProperty;
 
@@ -41,28 +34,31 @@ public class WicketApplication extends WebApplication {
 		this.getResourceSettings().setResourcePollFrequency(null);
 
 		addComponentInstantiationListener(new SpringComponentInjector(this));
+		
+		mountBookmarkablePage("home", HomePage.class);
+		mountBookmarkablePage("configurarOnline", ConfigurarOnlinePage.class);
 
-		ISecuritySettings securitySettings = getSecuritySettings();
-
-		securitySettings.setAuthorizationStrategy(new IAuthorizationStrategy() {
-			public boolean isActionAuthorized(Component component, Action action) {
-				return true;
-			}
-
-			public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
-				if (PaginaBase.class.isAssignableFrom(componentClass)) {
-					return OpcoesWebHttpSession.get().isAutenticado();
-				}
-				return true;
-			}
-		});
-
-		securitySettings.setUnauthorizedComponentInstantiationListener( //
-				new IUnauthorizedComponentInstantiationListener() {
-					public void onUnauthorizedInstantiation(Component component) {
-						throw new RestartResponseAtInterceptPageException(LoginPage.class);
-					}
-				});
+//		ISecuritySettings securitySettings = getSecuritySettings();
+//
+//		securitySettings.setAuthorizationStrategy(new IAuthorizationStrategy() {
+//			public boolean isActionAuthorized(Component component, Action action) {
+//				return true;
+//			}
+//
+//			public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
+//				if (PaginaBase.class.isAssignableFrom(componentClass)) {
+//					return OpcoesWebHttpSession.get().isAutenticado();
+//				}
+//				return true;
+//			}
+//		});
+//
+//		securitySettings.setUnauthorizedComponentInstantiationListener( //
+//				new IUnauthorizedComponentInstantiationListener() {
+//					public void onUnauthorizedInstantiation(Component component) {
+//						throw new RestartResponseAtInterceptPageException(LoginPage.class);
+//					}
+//				});
 	}
 
 	@Override
